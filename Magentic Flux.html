@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แบบจำลองฟลักซ์แม่เหล็ก (Magnetic Flux)</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif, 'Sarabun';
+            background-color: #f0f4f8;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+        }
+        h1 { color: #2c3e50; }
+        canvas {
+            background-color: #fafafa;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        .controls {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #e9ecef;
+            border-radius: 8px;
+        }
+        input[type="range"] {
+            width: 80%;
+            margin: 10px 0;
+        }
+        .formula-box {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            font-size: 1.2em;
+        }
+        .formula {
+            background-color: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 5px solid #2196f3;
+            width: 45%;
+        }
+        .highlight { color: #d32f2f; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>แบบจำลองฟลักซ์แม่เหล็ก (Magnetic Flux)</h1>
+    <p>เลื่อนแถบเพื่อปรับมุมของทิศทางสนามแม่เหล็กเทียบกับระนาบและเส้นแนวฉาก</p>
+    
+    <div class="controls">
+        <label for="angleSlider" style="font-size: 1.1em; font-weight: bold;">
+            ปรับมุม &theta; (มุมกับเส้นแนวฉาก): <span id="thetaVal" class="highlight">45</span>&deg;
+        </label><br>
+        <input type="range" id="angleSlider" min="0" max="90" value="45" oninput="updateSimulation()">
+    </div>
+
+    <canvas id="simCanvas" width="600" height="350"></canvas>
+
+    <div class="formula-box">
+        <div class="formula">
+            <strong>สมการเมื่อใช้มุม &theta; (เส้นแนวฉาก)</strong><br>
+            &Phi; = BA cos(&theta;)<br>
+            &Phi; = (1)(1) cos(<span id="calcTheta">45</span>&deg;)<br>
+            &Phi; = <span id="resTheta" class="highlight">0.707</span> Wb
+        </div>
+        <div class="formula" style="background-color: #fce4ec; border-left-color: #e91e63;">
+            <strong>สมการเมื่อใช้มุม &alpha; (ระนาบพื้นที่)</strong><br>
+            &Phi; = BA sin(&alpha;)<br>
+            &Phi; = (1)(1) sin(<span id="calcAlpha">45</span>&deg;)<br>
+            &Phi; = <span id="resAlpha" class="highlight">0.707</span> Wb
+        </div>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('simCanvas');
+    const ctx = canvas.getContext('2d');
+    const slider = document.getElementById('angleSlider');
+    
+    // จุดศูนย์กลางการวาด
+    const cx = canvas.width / 2;
+    const cy = canvas.height - 50;
+    const lineLength = 200;
+
+    function drawArrow(x, y, angle, color, text) {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(angle);
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(lineLength, 0);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 4;
+        ctx.stroke();
+        
+        // หัวลูกศร
+        ctx.beginPath();
+        ctx.moveTo(lineLength, 0);
+        ctx.lineTo(lineLength - 15, -10);
+        ctx.lineTo(lineLength - 15, 10);
+        ctx.fillStyle = color;
+        ctx.fill();
+        
+        ctx.fillStyle = color;
+        ctx.font = "bold 18px Arial";
+        ctx.fillText(text, lineLength + 10, 5);
+        ctx.restore();
+    }
+
+    function drawSimulation(thetaDeg) {
+        // ล้างหน้าจอ
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        let alphaDeg = 90 - thetaDeg;
+        let thetaRad = thetaDeg * Math.PI / 180;
+        let alphaRad = alphaDeg * Math.PI / 180;
+
+        // วาดระนาบพื้นที่ (แนวนอน)
+        ctx.beginPath();
+        ctx.moveTo(50, cy);
+        ctx.lineTo(canvas.width - 50, cy);
+        ctx.strokeStyle = '#333';
+        ctx.lineWidth = 5;
+        ctx.stroke();
+        ctx.fillStyle = '#333';
+        ctx.font = "16px Sarabun, Tahoma";
+        ctx.fillText("ระนาบพื้นที่ (Area)", canvas.width - 150, cy + 25);
+
+        // วาดเส้นแนวฉาก (แนวตั้ง)
+        ctx.beginPath();
+        ctx.setLineDash([10, 10]);
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(cx, cy - lineLength - 20);
+        ctx.strokeStyle = '#2196f3';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        ctx.setLineDash([]); // รีเซ็ตเส้นประ
+        ctx.fillStyle = '#2196f3';
+        ctx.fillText("เส้นแนวฉาก (Normal)", cx - 70, cy - lineLength - 30);
+
+        // วาดสนามแม่เหล็ก B (มุมวัดจากแกน Y ติดลบ)
+        // ในระบบพิกัด Canvas มุม 0 คือแกน X ขวา, 90 คือแกน Y ลง
+        // เราต้องการให้สนามแม่เหล็กหมุนจากตั้งฉาก (มุม -90) ไปยังขนาน (มุม 0 หรือ -180)
+        let bAngle = -Math.PI/2 + thetaRad;
+        drawArrow(cx, cy, bAngle, '#e91e63', 'B');
+
+        // วาดส่วนโค้งมุม Theta (มุมระหว่างแนวฉากกับ B)
+        if (thetaDeg > 0) {
+            ctx.beginPath();
+            ctx.arc(cx, cy, 100, -Math.PI/2, bAngle);
+            ctx.strokeStyle = '#2196f3';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            ctx.fillStyle = '#2196f3';
+            let labelAngleTheta = -Math.PI/2 + thetaRad / 2;
+            ctx.fillText("θ = " + thetaDeg + "°", cx + 110 * Math.cos(labelAngleTheta) - 20, cy + 110 * Math.sin(labelAngleTheta));
+        }
+
+        // วาดส่วนโค้งมุม Alpha (มุมระหว่างระนาบกับ B)
+        if (alphaDeg > 0) {
+            ctx.beginPath();
+            // ระนาบฝั่งขวาคือมุม 0 ฝั่งซ้ายคือ -Math.PI
+            // เนื่องจากเข็ม B เอียงไปทางขวาเสมอ มุมเริ่มต้นของส่วนโค้งคือ 0 วนไปจนถึง bAngle
+            ctx.arc(cx, cy, 70, bAngle, 0);
+            ctx.strokeStyle = '#e91e63';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            ctx.fillStyle = '#e91e63';
+            let labelAngleAlpha = bAngle / 2;
+            ctx.fillText("α = " + alphaDeg + "°", cx + 80 * Math.cos(labelAngleAlpha), cy + 80 * Math.sin(labelAngleAlpha) + 10);
+        }
+    }
+
+    function updateSimulation() {
+        let theta = parseInt(slider.value);
+        let alpha = 90 - theta;
+        
+        // อัปเดตตัวเลขบนหน้าจอ
+        document.getElementById('thetaVal').innerText = theta;
+        document.getElementById('calcTheta').innerText = theta;
+        document.getElementById('calcAlpha').innerText = alpha;
+        
+        // คำนวณฟลักซ์ (สมมติ B=1, A=1)
+        let fluxTheta = Math.cos(theta * Math.PI / 180).toFixed(3);
+        let fluxAlpha = Math.sin(alpha * Math.PI / 180).toFixed(3);
+        
+        document.getElementById('resTheta').innerText = fluxTheta;
+        document.getElementById('resAlpha').innerText = fluxAlpha;
+
+        drawSimulation(theta);
+    }
+
+    // วาดครั้งแรกตอนโหลดหน้าเว็บ
+    window.onload = updateSimulation;
+</script>
+
+</body>
+</html>
