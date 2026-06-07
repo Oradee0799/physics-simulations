@@ -3,97 +3,252 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>เกมแรงเป็นศูนย์หรือไม่</title>
+<title>เกมแรงเป็นศูนย์หรือไม่ — ห้องเรียน</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Prompt:wght@400;700;900&family=Sarabun:wght@400;700&display=swap');
 :root{
-  --blue:#1d4ed8;--dark:#0f2d6b;--green:#16a34a;--red:#dc2626;
-  --bg1:#e8f4ff;--bg2:#fff5df;--card:#fff;--line:#dbeafe;
+  --blue:#1d4ed8;--dark:#0f2d6b;--green:#16a34a;--red:#dc2626;--yellow:#f59e0b;
+  --bg1:#e8f4ff;--bg2:#fff5df;
 }
-*{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
-body{
-  margin:0; min-height:100svh; font-family:"Noto Sans Thai","Prompt","Sarabun",Tahoma,sans-serif;
-  color:#172033; background:linear-gradient(135deg,var(--bg1),var(--bg2)); overflow-x:hidden;
-}
-.app{width:min(1120px,100%); margin:auto; padding:max(10px,env(safe-area-inset-top)) max(10px,env(safe-area-inset-right)) max(14px,env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left))}
-.hero{
-  background:rgba(255,255,255,.94); border-radius:28px; padding:clamp(14px,3vw,24px);
-  box-shadow:0 16px 42px #0f172a22; position:relative; overflow:hidden;
-}
-.hero:after{content:"🧲";position:absolute;right:18px;top:10px;font-size:clamp(44px,9vw,82px);opacity:.18}
-h1{margin:0;color:var(--dark);font-size:clamp(30px,7vw,64px);line-height:1.05;padding-right:70px}
-.sub{font-size:clamp(15px,3vw,24px);font-weight:800;margin-top:8px}
-.formula{display:inline-block;margin-top:10px;padding:8px 14px;border-radius:999px;background:#eff6ff;border:2px solid #bfdbfe;font-weight:900;color:var(--dark)}
-.toolbar{display:grid;grid-template-columns:1fr auto auto;gap:10px;margin:14px 0;align-items:center}
-.score{display:flex;gap:8px;flex-wrap:wrap;background:#fff;border-radius:18px;padding:10px;box-shadow:0 10px 24px #0f172a14}
-.pill{background:#f1f5f9;border-radius:999px;padding:7px 10px;font-weight:900;font-size:clamp(14px,2.7vw,16px)}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{min-height:100svh;font-family:"Prompt","Sarabun",Tahoma,sans-serif;color:#172033;background:linear-gradient(135deg,var(--bg1),var(--bg2));overflow-x:hidden}
 button{font-family:inherit;border:0;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
-.btn{min-height:54px;border-radius:16px;padding:10px 16px;font-size:clamp(15px,3vw,17px);font-weight:900}
+.screen{display:none;min-height:100svh}
+.screen.active{display:flex;flex-direction:column}
+
+/* LOGIN */
+#loginScreen{align-items:center;justify-content:center;padding:20px;min-height:100svh}
+.login-box{background:#fff;border-radius:28px;padding:clamp(24px,5vw,44px);box-shadow:0 20px 60px #0f172a28;width:min(460px,100%);text-align:center;position:relative;overflow:hidden}
+.login-box::before{content:"🧲";position:absolute;right:16px;top:8px;font-size:80px;opacity:.1}
+.login-title{font-size:clamp(26px,6vw,42px);font-weight:900;color:var(--dark);line-height:1.1;margin-bottom:6px}
+.login-sub{color:#64748b;font-size:clamp(14px,3vw,17px);font-weight:700;margin-bottom:24px}
+.field-label{text-align:left;font-size:14px;font-weight:900;color:#475569;margin-bottom:6px}
+.id-input{width:100%;border:3px solid #bfdbfe;border-radius:16px;padding:14px 18px;font-size:clamp(17px,4vw,21px);font-family:inherit;font-weight:700;color:var(--dark);outline:none;transition:.2s;margin-bottom:4px;text-align:center;letter-spacing:2px}
+.id-input:focus{border-color:var(--blue);box-shadow:0 0 0 4px #3b82f622}
+.id-hint{font-size:13px;color:#94a3b8;font-weight:700;margin-bottom:14px;min-height:18px;text-align:left}
+.class-select{width:100%;border:3px solid #bfdbfe;border-radius:16px;padding:13px 18px;font-size:clamp(15px,3.5vw,18px);font-family:inherit;font-weight:700;color:var(--dark);outline:none;background:#fff;margin-bottom:18px;cursor:pointer}
+.class-select:focus{border-color:var(--blue)}
+.student-preview{background:#f0fdf4;border:2px solid #bbf7d0;border-radius:14px;padding:12px 16px;margin-bottom:16px;display:none;text-align:left}
+.student-preview.show{display:block}
+.student-preview-name{font-size:17px;font-weight:900;color:#14532d}
+.student-preview-id{font-size:13px;color:#16a34a;font-weight:700}
+.btn-start{width:100%;min-height:56px;border-radius:18px;background:var(--blue);color:#fff;font-size:clamp(17px,4vw,21px);font-weight:900;transition:.2s}
+.btn-start:hover{background:#1e40af;transform:translateY(-1px)}
+.btn-start:disabled{opacity:.4;transform:none;cursor:not-allowed}
+.or-div{display:flex;align-items:center;gap:10px;margin:16px 0;color:#94a3b8;font-size:13px}
+.or-div::before,.or-div::after{content:"";flex:1;height:1px;background:#e2e8f0}
+.btn-teacher{width:100%;min-height:46px;border-radius:14px;background:#f1f5f9;color:#475569;font-size:14px;font-weight:700;border:2px solid #e2e8f0;transition:.2s}
+.btn-teacher:hover{background:#e2e8f0}
+
+/* GAME */
+#gameScreen{padding:max(10px,env(safe-area-inset-top)) max(10px,env(safe-area-inset-right)) max(14px,env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left))}
+.app{width:min(1120px,100%);margin:auto}
+.hero{background:rgba(255,255,255,.94);border-radius:28px;padding:clamp(12px,3vw,22px);box-shadow:0 16px 42px #0f172a22;position:relative;overflow:hidden;margin-bottom:12px}
+.hero:after{content:"🧲";position:absolute;right:16px;top:8px;font-size:clamp(44px,9vw,80px);opacity:.18}
+.hero-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.player-badge{background:var(--dark);color:#fff;border-radius:12px;padding:7px 13px;font-weight:900;font-size:clamp(13px,2.8vw,16px);white-space:nowrap}
+h1{color:var(--dark);font-size:clamp(22px,5vw,48px);line-height:1.05;padding-right:60px}
+.sub{font-size:clamp(13px,2.5vw,19px);font-weight:800;margin-top:4px}
+.formula{display:inline-block;margin-top:7px;padding:6px 13px;border-radius:999px;background:#eff6ff;border:2px solid #bfdbfe;font-weight:900;color:var(--dark);font-size:clamp(13px,2.5vw,16px)}
+.toolbar{display:grid;grid-template-columns:1fr auto auto;gap:10px;margin:12px 0;align-items:center}
+.score{display:flex;gap:8px;flex-wrap:wrap;background:#fff;border-radius:18px;padding:9px;box-shadow:0 8px 20px #0f172a12}
+.pill{background:#f1f5f9;border-radius:999px;padding:6px 10px;font-weight:900;font-size:clamp(13px,2.5vw,15px)}
+.btn{min-height:50px;border-radius:14px;padding:9px 15px;font-size:clamp(14px,2.8vw,16px);font-weight:900}
 .btn-primary{background:var(--blue);color:#fff}.btn-soft{background:#fff;color:var(--dark);border:2px solid #bfdbfe}
 button:disabled{opacity:.45;cursor:not-allowed}
-.game{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(290px,.85fr);gap:14px}
-.card,.panel,.end{
-  background:rgba(255,255,255,.96);border-radius:26px;padding:clamp(16px,3vw,24px);
-  box-shadow:0 16px 40px #0f172a20;border:2px solid #ffffffaa;
-}
-.card{min-height:430px;display:flex;flex-direction:column}
+.game{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(280px,.85fr);gap:12px}
+.card,.panel,.end{background:rgba(255,255,255,.96);border-radius:24px;padding:clamp(14px,3vw,22px);box-shadow:0 14px 36px #0f172a1e;border:2px solid #ffffffaa}
+.card{min-height:420px;display:flex;flex-direction:column}
 .top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
-.badge{background:var(--dark);color:#fff;border-radius:16px;padding:8px 13px;font-size:clamp(18px,4vw,22px);font-weight:1000}
-.tag{background:#fef3c7;color:#92400e;border-radius:999px;padding:8px 12px;font-weight:1000}
-.question{margin:clamp(16px,4vw,28px) 0 14px;font-size:clamp(25px,6.3vw,44px);font-weight:1000;line-height:1.22;color:#0f172a}
-.visual{display:flex;align-items:center;gap:12px;padding:12px;border:2px dashed #cbd5e1;border-radius:20px;background:linear-gradient(135deg,#f8fafc,#eef6ff);min-height:100px;margin-bottom:14px}
-.icon{width:clamp(58px,13vw,78px);height:clamp(58px,13vw,78px);border-radius:22px;background:#fff;display:grid;place-items:center;font-size:clamp(34px,8vw,46px);box-shadow:inset 0 0 0 2px #e2e8f0;flex:0 0 auto}
-.visualText{font-size:clamp(16px,3.7vw,20px);line-height:1.45;font-weight:850;color:#334155}
-.answers{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:auto}
-.choice{min-height:clamp(68px,14vw,92px);border-radius:22px;padding:12px;font-size:clamp(20px,4.7vw,25px);font-weight:1000;border:3px solid transparent}
+.badge{background:var(--dark);color:#fff;border-radius:14px;padding:7px 12px;font-size:clamp(16px,3.8vw,21px);font-weight:1000}
+.tag{background:#fef3c7;color:#92400e;border-radius:999px;padding:7px 11px;font-weight:1000}
+.question{margin:clamp(14px,3.5vw,26px) 0 12px;font-size:clamp(23px,6vw,42px);font-weight:1000;line-height:1.22;color:#0f172a}
+.visual{display:flex;align-items:center;gap:12px;padding:11px;border:2px dashed #cbd5e1;border-radius:18px;background:linear-gradient(135deg,#f8fafc,#eef6ff);min-height:90px;margin-bottom:12px}
+.icon{width:clamp(54px,12vw,74px);height:clamp(54px,12vw,74px);border-radius:20px;background:#fff;display:grid;place-items:center;font-size:clamp(30px,7vw,44px);box-shadow:inset 0 0 0 2px #e2e8f0;flex:0 0 auto}
+.visualText{font-size:clamp(15px,3.5vw,19px);line-height:1.45;font-weight:850;color:#334155}
+.answers{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:auto}
+.choice{min-height:clamp(64px,13vw,88px);border-radius:20px;padding:11px;font-size:clamp(18px,4.5vw,24px);font-weight:1000;border:3px solid transparent}
 .zero{background:#fff1f2;color:#991b1b;border-color:#fecdd3}.nonzero{background:#ecfdf5;color:#166534;border-color:#bbf7d0}
 .correct{background:#dcfce7!important;border-color:var(--green)!important;color:#14532d!important;outline:5px solid #16a34a33}
 .wrong{background:#fee2e2!important;border-color:var(--red)!important;color:#7f1d1d!important;outline:5px solid #dc262633}
-.feedback{display:none;margin-top:14px;border-radius:20px;padding:14px;font-size:clamp(16px,3.4vw,19px);line-height:1.55;font-weight:850}
+.feedback{display:none;margin-top:12px;border-radius:18px;padding:13px;font-size:clamp(15px,3.2vw,18px);line-height:1.55;font-weight:850}
 .show{display:block}.good{background:#dcfce7;color:#14532d;border:2px solid #86efac}.bad{background:#fee2e2;color:#7f1d1d;border:2px solid #fca5a5}
-.side{display:flex;flex-direction:column;gap:14px}.panel h2,summary{margin:0 0 8px;color:var(--dark);font-size:clamp(20px,4vw,24px);font-weight:1000}
+.side{display:flex;flex-direction:column;gap:12px}.panel h2,summary{margin:0 0 7px;color:var(--dark);font-size:clamp(18px,3.8vw,22px);font-weight:1000}
 summary{cursor:pointer;list-style:none}summary::-webkit-details-marker{display:none}
-ul{margin:8px 0 0;padding-left:22px;font-size:clamp(15px,3.2vw,17px);line-height:1.65;font-weight:800}
-.hint{font-size:clamp(14px,3vw,16px);line-height:1.55;font-weight:800;color:#64748b}
-.progress{height:16px;background:#e2e8f0;border-radius:999px;overflow:hidden}.bar{height:100%;width:0;background:linear-gradient(90deg,#06b6d4,var(--blue));border-radius:999px;transition:.25s}
-.end{display:none;text-align:center;margin-top:14px}.end.show{display:block}.end h2{font-size:clamp(28px,6vw,46px);margin:0;color:var(--dark)}
-.big{font-size:clamp(56px,18vw,98px);font-weight:1000;color:var(--dark);line-height:1;margin:10px 0}
-.review{text-align:left;display:grid;gap:10px;margin-top:16px}.item{border-left:7px solid #cbd5e1;background:#f8fafc;border-radius:15px;padding:12px;font-weight:750;line-height:1.45}.ok{border-left-color:var(--green)}.no{border-left-color:var(--red)}
+ul{margin:7px 0 0;padding-left:20px;font-size:clamp(14px,3vw,16px);line-height:1.65;font-weight:800}
+.hint{font-size:clamp(13px,2.8vw,15px);line-height:1.55;font-weight:800;color:#64748b}
+.progress{height:14px;background:#e2e8f0;border-radius:999px;overflow:hidden}.bar{height:100%;width:0;background:linear-gradient(90deg,#06b6d4,var(--blue));border-radius:999px;transition:.25s}
+.end{display:none;text-align:center;margin-top:12px}.end.show{display:block}.end h2{font-size:clamp(26px,5.5vw,44px);margin:0;color:var(--dark)}
+.big{font-size:clamp(52px,16vw,92px);font-weight:1000;color:var(--dark);line-height:1;margin:8px 0}
+.review{text-align:left;display:grid;gap:9px;margin-top:14px}.item{border-left:6px solid #cbd5e1;background:#f8fafc;border-radius:13px;padding:11px;font-weight:750;line-height:1.45}.ok{border-left-color:var(--green)}.no{border-left-color:var(--red)}
 .hidden{display:none!important}
+.submit-score-box{background:linear-gradient(135deg,#eff6ff,#ecfdf5);border:2px solid #bfdbfe;border-radius:18px;padding:18px;margin-top:14px;text-align:center}
+.submit-score-box h3{color:var(--dark);font-size:20px;margin-bottom:7px}
+.btn-submit{min-height:50px;width:100%;border-radius:14px;background:var(--green);color:#fff;font-size:17px;font-weight:900;margin-top:9px;transition:.2s}
+.btn-submit:hover{background:#15803d}
+.btn-submit:disabled{background:#86efac;cursor:not-allowed}
+.submit-status{font-size:14px;color:#64748b;margin-top:7px;min-height:20px;font-weight:700}
+
+/* MINECRAFT MAP */
+.mc-panel{background:rgba(255,255,255,.96);border-radius:24px;padding:clamp(12px,3vw,20px);box-shadow:0 14px 36px #0f172a1e;border:2px solid #ffffffaa;margin-top:12px}
+.mc-panel h2{color:var(--dark);font-size:clamp(16px,3.5vw,20px);font-weight:1000;margin-bottom:10px}
+.mc-track{position:relative;background:#e7f5e7;border-radius:14px;padding:10px;overflow:hidden;border:2px solid #bbf7d0}
+.mc-rail{display:flex;gap:4px;align-items:flex-end;padding-bottom:32px}
+.mc-block{width:clamp(22px,4.5vw,32px);height:clamp(22px,4.5vw,32px);border-radius:4px;flex-shrink:0;position:relative;font-size:clamp(10px,2vw,13px);font-weight:900;display:flex;align-items:center;justify-content:center;color:#fff;text-shadow:0 1px 2px #0006}
+.mc-block.done{background:#22c55e}
+.mc-block.active-q{background:#f59e0b;animation:pulse .7s infinite alternate}
+.mc-block.empty{background:#d1fae5}
+@keyframes pulse{from{transform:scale(1)}to{transform:scale(1.12)}}
+.mc-finish{width:clamp(28px,5vw,38px);height:clamp(28px,5vw,38px);border-radius:6px;background:#ef4444;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.mc-players{margin-top:8px;display:flex;flex-direction:column;gap:6px;max-height:220px;overflow-y:auto}
+.mc-player-row{display:flex;align-items:center;gap:8px;background:#fff;border-radius:10px;padding:6px 10px;border:1.5px solid #e2e8f0}
+.mc-player-row.is-me{border-color:var(--blue);background:#eff6ff}
+.mc-avatar{width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;font-weight:900;color:#fff}
+.mc-pname{font-size:clamp(12px,2.5vw,14px);font-weight:900;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mc-pstep{font-size:clamp(11px,2vw,13px);color:#64748b;font-weight:700;white-space:nowrap}
+.mc-pbar-wrap{width:80px;flex-shrink:0}
+.mc-pbar{height:6px;background:#e2e8f0;border-radius:999px;overflow:hidden}
+.mc-pbar-inner{height:100%;border-radius:999px;background:linear-gradient(90deg,#06b6d4,var(--blue));transition:.4s}
+
+/* LEADERBOARD */
+#lbScreen{padding:20px;min-height:100svh}
+.lb-wrap{width:min(920px,100%);margin:auto}
+.lb-header{background:var(--dark);color:#fff;border-radius:26px;padding:clamp(18px,4vw,34px);text-align:center;margin-bottom:18px;position:relative;overflow:hidden}
+.lb-header::before{content:"🏆";position:absolute;left:18px;top:8px;font-size:66px;opacity:.15}
+.lb-header::after{content:"🧲";position:absolute;right:18px;top:8px;font-size:66px;opacity:.15}
+.lb-title{font-size:clamp(24px,5vw,42px);font-weight:900;margin-bottom:4px}
+.lb-sub{font-size:clamp(14px,3vw,19px);opacity:.8;font-weight:700}
+.lb-controls{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
+.lb-filter{border:2px solid #bfdbfe;border-radius:12px;padding:9px 13px;font-size:14px;font-family:inherit;font-weight:700;color:var(--dark);outline:none;background:#fff;cursor:pointer;flex:1;min-width:120px}
+.lb-filter:focus{border-color:var(--blue)}
+.btn-ctrl{min-height:44px;border-radius:12px;font-size:14px;font-weight:900;padding:0 16px;flex-shrink:0}
+.btn-refresh{background:var(--blue);color:#fff}.btn-refresh:hover{background:#1e40af}
+.btn-export{background:#16a34a;color:#fff}.btn-export:hover{background:#15803d}
+.btn-reset-lb{background:#fff;color:#dc2626;border:2px solid #fecdd3}.btn-reset-lb:hover{background:#fee2e2}
+.btn-reset-prog{background:#fff;color:#92400e;border:2px solid #fde68a}.btn-reset-prog:hover{background:#fef3c7}
+.auto-badge{background:#ecfdf5;color:#166534;border-radius:999px;padding:5px 11px;font-size:12px;font-weight:700}
+.lb-table-wrap{background:#fff;border-radius:22px;box-shadow:0 10px 32px #0f172a18;overflow:hidden;margin-bottom:14px}
+.lb-table{width:100%;border-collapse:collapse}
+.lb-table th{background:var(--dark);color:#fff;padding:13px 15px;text-align:left;font-size:15px;font-weight:900}
+.lb-table th:last-child,.lb-table td:last-child{text-align:center}
+.lb-table td{padding:12px 15px;font-size:14px;font-weight:800;border-bottom:1px solid #f1f5f9;vertical-align:middle}
+.lb-table tr:last-child td{border-bottom:none}
+.lb-table tr:hover td{background:#f8fafc}
+.rank-1 td{background:linear-gradient(90deg,#fffbeb,#fff)!important}
+.rank-2 td{background:linear-gradient(90deg,#f8fafc,#fff)!important}
+.rank-3 td{background:linear-gradient(90deg,#fff7ed,#fff)!important}
+.rank-medal{font-size:20px;display:inline-block;width:30px;text-align:center}
+.score-bar-wrap{display:flex;align-items:center;gap:8px}
+.score-bar{height:9px;border-radius:999px;background:linear-gradient(90deg,#06b6d4,var(--blue));flex-shrink:0;transition:.3s}
+.lb-empty{text-align:center;padding:44px 20px;color:#94a3b8;font-size:18px;font-weight:700}
+.lb-last-update{text-align:center;font-size:12px;color:#94a3b8;margin-top:10px;font-weight:700}
+.back-btn{background:#fff;border:2px solid #bfdbfe;color:var(--dark);border-radius:13px;padding:9px 16px;font-size:14px;font-weight:900;margin-bottom:14px;display:inline-flex;align-items:center;gap:6px}
+.back-btn:hover{background:#eff6ff}
+.class-tag{display:inline-block;background:#eff6ff;color:var(--blue);border-radius:7px;padding:2px 9px;font-size:12px;font-weight:900;margin-left:5px}
+.attempt-tag{display:inline-block;background:#f1f5f9;color:#475569;border-radius:7px;padding:2px 7px;font-size:11px;font-weight:700;margin-left:3px}
+
+/* MINECRAFT LB MAP (teacher big screen) */
+.mc-lb-map{background:#e7f5e7;border-radius:18px;padding:14px;border:2px solid #bbf7d0;margin-bottom:14px;overflow-x:auto}
+.mc-lb-map h3{color:#14532d;font-size:16px;font-weight:900;margin-bottom:10px}
+.mc-lb-rows{display:flex;flex-direction:column;gap:6px}
+.mc-lb-row{display:flex;align-items:center;gap:8px}
+.mc-lb-name{font-size:13px;font-weight:900;color:var(--dark);width:130px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mc-lb-track{display:flex;gap:3px;align-items:center;flex:1}
+.mc-lb-sq{width:24px;height:24px;border-radius:3px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px}
+.mc-lb-sq.sq-done{background:#22c55e}
+.mc-lb-sq.sq-active{background:#f59e0b;animation:pulse .7s infinite alternate}
+.mc-lb-sq.sq-empty{background:#d1fae5;border:1px solid #86efac}
+.mc-lb-sq.sq-fin{background:#ef4444;font-size:14px}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:#0f172a88;display:flex;align-items:center;justify-content:center;z-index:100;backdrop-filter:blur(4px)}
+.modal-box{background:#fff;border-radius:22px;padding:30px;width:min(340px,90%);text-align:center;box-shadow:0 22px 60px #0f172a44}
+.modal-box h3{color:var(--dark);font-size:22px;font-weight:900;margin-bottom:7px}
+.modal-box p{color:#64748b;font-size:14px;margin-bottom:18px;font-weight:700}
+.modal-input{width:100%;border:3px solid #bfdbfe;border-radius:13px;padding:13px;font-size:17px;font-family:inherit;font-weight:700;text-align:center;outline:none;margin-bottom:11px}
+.modal-input:focus{border-color:var(--blue)}
+.modal-error{color:var(--red);font-size:13px;font-weight:700;margin-bottom:9px;min-height:18px}
+.btn-modal{width:100%;min-height:48px;border-radius:13px;background:var(--blue);color:#fff;font-size:16px;font-weight:900}
+.btn-modal-cancel{width:100%;min-height:42px;border-radius:13px;background:#f1f5f9;color:#475569;font-size:14px;font-weight:700;margin-top:7px}
+
+/* AVATAR COLORS */
+.av0{background:#6366f1}.av1{background:#f59e0b}.av2{background:#10b981}.av3{background:#ef4444}
+.av4{background:#8b5cf6}.av5{background:#06b6d4}.av6{background:#f97316}.av7{background:#ec4899}
+.av8{background:#14b8a6}.av9{background:#84cc16}
+
 @media(max-width:760px) and (orientation:portrait){
- .app{padding:10px}.toolbar{grid-template-columns:1fr;position:sticky;top:0;z-index:20;background:#e8f4ffee;border-radius:18px;padding:8px 0;backdrop-filter:blur(8px)}
- .score{justify-content:center}.toolbar .btn{width:100%}.game{grid-template-columns:1fr}.answers{grid-template-columns:1fr}.card{min-height:calc(100svh - 250px)}
+ .toolbar{grid-template-columns:1fr;position:sticky;top:0;z-index:20;background:#e8f4ffee;border-radius:18px;padding:8px 0;backdrop-filter:blur(8px)}
+ .score{justify-content:center}.toolbar .btn{width:100%}.game{grid-template-columns:1fr}.answers{grid-template-columns:1fr}.card{min-height:calc(100svh - 240px)}
+ .lb-controls{flex-direction:column}.lb-filter,.btn-ctrl{width:100%}.auto-badge{margin-left:0}
 }
 @media(max-height:520px) and (orientation:landscape){
- .app{padding:8px}.hero{padding:9px 14px;border-radius:18px}h1{font-size:28px}.sub{font-size:14px}.formula{font-size:13px;padding:5px 10px;margin-top:5px}
- .toolbar{grid-template-columns:1fr auto auto;margin:8px 0}.pill{font-size:12px;padding:5px 8px}.btn{min-height:42px;font-size:13px;padding:6px 10px}
- .game{grid-template-columns:1fr 320px;gap:8px}.card{max-height:calc(100svh - 128px);overflow:auto;min-height:auto;padding:12px;border-radius:18px}
- .badge{font-size:15px;padding:6px 10px}.tag{font-size:12px;padding:5px 8px}.question{font-size:24px;margin:10px 0}.visual{min-height:72px;padding:8px}.icon{width:52px;height:52px;font-size:30px}.visualText{font-size:14px}
- .choice{min-height:54px;font-size:18px}.feedback{font-size:14px;padding:10px;margin-top:8px}.side{max-height:calc(100svh - 128px);overflow:auto;gap:8px}.panel{padding:10px;border-radius:18px}ul,.hint{font-size:12px}
-}
-@media(min-width:761px) and (max-width:1024px) and (orientation:portrait){
- .game{grid-template-columns:1fr}.side{display:grid;grid-template-columns:1fr 1fr}.side details{grid-column:1/-1}.card{min-height:520px}
+ .app{padding:8px}.hero{padding:8px 12px;border-radius:16px}h1{font-size:26px}
+ .game{grid-template-columns:1fr 300px;gap:8px}.card{max-height:calc(100svh - 120px);overflow:auto;min-height:auto}
 }
 </style>
 </head>
 <body>
+
+<!-- LOGIN -->
+<div class="screen active" id="loginScreen">
+  <div class="login-box">
+    <div class="login-title">เกมแรงเป็นศูนย์<br>หรือไม่</div>
+    <div class="login-sub">ฝึกวิเคราะห์แรงแม่เหล็ก | ฟิสิกส์ ม.6</div>
+    <div class="field-label">เลือกห้องเรียน</div>
+    <select class="class-select" id="classSelect" onchange="onClassChange()">
+      <option value="">-- เลือกห้องเรียน --</option>
+      <option value="6/SM">ม.6/SM</option>
+      <option value="6/2">ม.6/2</option>
+      <option value="6/4">ม.6/4</option>
+    </select>
+    <div class="field-label">รหัสนักเรียน (ID)</div>
+    <input class="id-input" id="idInput" type="number" placeholder="เช่น 175" min="1" autocomplete="off">
+    <div class="id-hint" id="idHint"></div>
+    <div class="student-preview" id="studentPreview">
+      <div class="student-preview-name" id="previewName"></div>
+      <div class="student-preview-id" id="previewId"></div>
+    </div>
+    <button class="btn-start" id="startBtn" disabled onclick="startGame()">🚀 เริ่มเกม</button>
+    <div class="or-div">หรือ</div>
+    <button class="btn-teacher" onclick="openTeacherModal()">👩‍🏫 เปิดหน้า Leaderboard (ครู)</button>
+  </div>
+</div>
+
+<!-- TEACHER MODAL -->
+<div class="modal-overlay" id="teacherModal" style="display:none">
+  <div class="modal-box">
+    <h3>🔐 ล็อกอินครู</h3>
+    <p>กรอกรหัสผ่านเพื่อเปิด Leaderboard</p>
+    <input class="modal-input" id="pwInput" type="password" placeholder="รหัสผ่าน" autocomplete="off">
+    <div class="modal-error" id="pwError"></div>
+    <button class="btn-modal" onclick="checkTeacherPw()">เข้าสู่ระบบ</button>
+    <button class="btn-modal-cancel" onclick="closeTeacherModal()">ยกเลิก</button>
+  </div>
+</div>
+
+<!-- GAME SCREEN -->
+<div class="screen" id="gameScreen">
 <div class="app">
 <section class="hero">
-<h1>เกมแรงเป็นศูนย์หรือไม่</h1>
-<div class="sub">ฝึกวิเคราะห์แรงแม่เหล็กที่กระทำต่ออนุภาคมีประจุไฟฟ้า</div>
-<div class="formula">หลักคิด: F = |q|vB sinθ</div>
+  <div class="hero-row">
+    <div class="player-badge" id="playerBadge">👤 ผู้เล่น</div>
+    <div>
+      <h1>เกมแรงเป็นศูนย์หรือไม่</h1>
+      <div class="sub">ฝึกวิเคราะห์แรงแม่เหล็กที่กระทำต่ออนุภาคมีประจุไฟฟ้า</div>
+      <div class="formula">F = |q|vB sinθ</div>
+    </div>
+  </div>
 </section>
-
 <div class="toolbar">
  <div class="score">
   <span class="pill">📌 ข้อที่ <span id="current">1</span>/<span id="total">15</span></span>
-  <span class="pill">⭐ คะแนน <span id="score">0</span></span>
-  <span class="pill">✅ ถูก <span id="correct">0</span></span>
+  <span class="pill">⭐ <span id="score">0</span></span>
+  <span class="pill">✅ <span id="correct">0</span></span>
  </div>
- <button class="btn btn-soft" onclick="restart()">เริ่มใหม่</button>
+ <button class="btn btn-soft" onclick="confirmRestart()">เริ่มใหม่</button>
  <button class="btn btn-primary" id="nextBtn" onclick="next()" disabled>ข้อต่อไป</button>
 </div>
-
 <main class="game" id="game">
 <section class="card">
  <div class="top"><div class="badge" id="cardNo">บัตรที่ 1</div><div class="tag">เลือกคำตอบ</div></div>
@@ -108,28 +263,506 @@ ul{margin:8px 0 0;padding-left:22px;font-size:clamp(15px,3.2vw,17px);line-height
 <aside class="side">
  <details class="panel" open><summary>กฎจำง่าย</summary>
   <ul>
-   <li>ไม่มีประจุไฟฟ้า q = 0 → แรงเป็นศูนย์</li>
-   <li>ไม่เคลื่อนที่ v = 0 → แรงเป็นศูนย์</li>
-   <li>ไม่มีสนามแม่เหล็ก B = 0 → แรงเป็นศูนย์</li>
-   <li>v ขนานกับ B → แรงเป็นศูนย์</li>
-   <li>v ตั้งฉากกับ B → แรงมากที่สุด</li>
+   <li>q = 0 → แรงเป็นศูนย์</li>
+   <li>v = 0 → แรงเป็นศูนย์</li>
+   <li>B = 0 → แรงเป็นศูนย์</li>
+   <li>v ขนานกับ B (θ=0°,180°) → ศูนย์</li>
+   <li>v ตั้งฉากกับ B (θ=90°) → มากสุด</li>
   </ul>
  </details>
- <section class="panel"><h2>ความคืบหน้า</h2><div class="progress"><div class="bar" id="bar"></div></div><div class="hint">ตอบให้ครบ 15 บัตร แล้วดูผลคะแนนท้ายเกม</div></section>
- <section class="panel"><h2>โจทย์คิดเร็ว</h2><div class="hint">ก่อนตอบให้เช็ก 4 อย่าง: q, v, B และมุม θ</div></section>
+ <section class="panel"><h2>ความคืบหน้า</h2><div class="progress"><div class="bar" id="bar"></div></div><div class="hint" style="margin-top:7px">ตอบให้ครบ 15 บัตร</div></section>
 </aside>
 </main>
 
+<!-- MINECRAFT REALTIME MAP (in game) -->
+<div class="mc-panel" id="mcPanel">
+  <h2>🎮 แผนที่ห้องเรียน Real-time</h2>
+  <canvas id="mcCanvas" style="width:100%;border-radius:12px;display:block;image-rendering:pixelated"></canvas>
+  <div id="mcLegend" style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;font-size:12px;font-weight:800;color:#475569"></div>
+</div>
+
 <section class="end" id="end">
- <h2>จบเกมแล้ว!</h2>
+ <h2>จบเกมแล้ว! 🎉</h2>
  <div class="big"><span id="final">0</span>/15</div>
- <p id="message"></p>
- <button class="btn btn-primary" onclick="restart()">เล่นอีกครั้ง</button>
+ <p id="message" style="font-size:clamp(17px,3.5vw,22px);font-weight:800;color:#475569;margin:8px 0"></p>
+ <div class="submit-score-box">
+   <h3>📤 ส่งคะแนนเข้าห้องเรียน</h3>
+   <p id="submitInfo" style="color:#64748b;font-size:14px;font-weight:700;margin-bottom:0"></p>
+   <button class="btn-submit" id="submitBtn" onclick="submitScore()">ส่งคะแนน</button>
+   <div class="submit-status" id="submitStatus"></div>
+ </div>
+ <button class="btn btn-primary" onclick="confirmRestart()" style="margin-top:12px;min-width:180px">🔄 เล่นอีกครั้ง</button>
  <div class="review" id="review"></div>
 </section>
 </div>
+</div>
 
+<!-- LEADERBOARD SCREEN -->
+<div class="screen" id="lbScreen">
+  <div class="lb-wrap">
+    <button class="back-btn" onclick="goHome()">← กลับ</button>
+    <div class="lb-header">
+      <div class="lb-title">🏆 Leaderboard</div>
+      <div class="lb-sub">เกมแรงเป็นศูนย์หรือไม่ — ฟิสิกส์ ม.6</div>
+    </div>
+
+    <!-- BIG MINECRAFT MAP for teacher -->
+    <div class="mc-lb-map">
+      <h3>🎮 แผนที่ Real-time — ทุกคนในห้อง</h3>
+      <canvas id="mcLbCanvas" style="width:100%;border-radius:12px;display:block;image-rendering:pixelated"></canvas>
+      <div id="mcLbLegend" style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;font-size:12px;font-weight:800;color:#475569"></div>
+    </div>
+
+    <div class="lb-controls">
+      <select class="lb-filter" id="classFilter" onchange="loadLeaderboard()">
+        <option value="">ทุกห้อง</option>
+        <option value="6/SM">ม.6/SM</option>
+        <option value="6/2">ม.6/2</option>
+        <option value="6/4">ม.6/4</option>
+      </select>
+      <button class="btn-ctrl btn-refresh" onclick="loadAll()">🔄 รีเฟรช</button>
+      <button class="btn-ctrl btn-export" onclick="exportExcel()">📥 Export Excel</button>
+      <button class="btn-ctrl btn-reset-lb" onclick="confirmResetScores()">🗑 ล้างคะแนน</button>
+      <button class="btn-ctrl btn-reset-prog" onclick="confirmResetProgress()">🔁 ล้าง Progress</button>
+      <span class="auto-badge">⏱ อัปเดตทุก 5 วิ</span>
+    </div>
+    <div class="lb-table-wrap">
+      <table class="lb-table">
+        <thead><tr>
+          <th style="width:56px">อันดับ</th>
+          <th>ชื่อ</th>
+          <th style="width:48px">ID</th>
+          <th style="width:76px">ห้อง</th>
+          <th style="width:170px">คะแนน (จาก 15)</th>
+          <th style="width:80px">ครั้งที่</th>
+        </tr></thead>
+        <tbody id="lbBody"><tr><td colspan="6" class="lb-empty">กำลังโหลด...</td></tr></tbody>
+      </table>
+    </div>
+    <div class="lb-last-update" id="lastUpdate"></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
+// ===== CONFIG =====
+const SB='https://nvwqfuliccdxgsmhmhrt.supabase.co/rest/v1';
+const KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im52d3FmdWxpY2NkeGdzbWhtaHJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMzEyNTQsImV4cCI6MjA5NDYwNzI1NH0.euNyFUCfhZsnlnzQcbYDrYTmakyeRqem3ZAkwBSGqsM';
+const H={'Content-Type':'application/json','apikey':KEY,'Authorization':'Bearer '+KEY};
+const TEACHER_PW='physics2568';
+const TOTAL_Q=15;
+
+const CLASS_ID_MAP={'6/SM':'6sm','6/2':'62','6/4':'64'};
+
+// Avatar skins (Minecraft-style emoji blocks)
+const SKINS=['🧑','👦','👧','🧒','👨','👩','🧑‍🎓','👦','🧑‍🔬','👩‍🎓'];
+const AV_COLORS=['av0','av1','av2','av3','av4','av5','av6','av7','av8','av9'];
+
+async function sbFetch(table,params='',method='GET',body=null){
+  const opts={method,headers:{...H,'Accept':'application/json'}};
+  if(body){opts.body=JSON.stringify(body);opts.headers['Prefer']='return=minimal'}
+  const r=await fetch(SB+'/'+table+'?'+params,opts);
+  if(!r.ok)throw new Error(await r.text());
+  if(method==='GET')return r.json();
+}
+
+// ===== STATE =====
+let playerName='',playerClass='',playerId=0,gameScore=0,gameCorrect=0;
+let gameAnswered=false,gameIdx=0,gameReview=[],scoreSubmitted=false;
+let progressRowId=null,lbInterval=null,mcInterval=null;
+let allStudentsCache=[];
+
+const $=id=>document.getElementById(id);
+function debounce(fn,ms){let t;return function(...a){clearTimeout(t);t=setTimeout(()=>fn(...a),ms)}}
+
+// ===== SCREEN =====
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  $(id).classList.add('active');
+}
+
+// ===== INIT =====
+window.addEventListener('DOMContentLoaded',()=>{
+  showScreen('loginScreen');
+  $('total').textContent=TOTAL_Q;
+  $('idInput').addEventListener('input',debounce(lookupStudent,600));
+  $('classSelect').addEventListener('change',()=>{$('idInput').value='';clearPreview();onClassChange()});
+  $('pwInput').addEventListener('keydown',e=>{if(e.key==='Enter')checkTeacherPw()});
+});
+
+function onClassChange(){
+  $('idInput').value='';clearPreview();
+  $('startBtn').disabled=true;
+}
+
+async function lookupStudent(){
+  const id=parseInt($('idInput').value);
+  const cls=$('classSelect').value;
+  if(!cls){$('idHint').textContent='กรุณาเลือกห้องก่อน';clearPreview();return}
+  if(!id||id<1){clearPreview();return}
+  $('idHint').textContent='⏳ กำลังค้นหา...';
+  try{
+    const rows=await sbFetch('students','id=eq.'+id+'&is_active=eq.true&select=id,full_name,class_id');
+    if(!rows||rows.length===0){
+      $('idHint').textContent='❌ ไม่พบรหัสนี้ในระบบ';
+      clearPreview();$('startBtn').disabled=true;return;
+    }
+    const s=rows[0];
+    // ตรวจห้อง
+    const expectedCid=CLASS_ID_MAP[cls];
+    if(expectedCid&&String(s.class_id)!==String(expectedCid)){
+      $('idHint').textContent='⚠️ รหัสนี้ไม่ได้อยู่ห้อง '+cls;
+      clearPreview();$('startBtn').disabled=true;return;
+    }
+    $('idHint').textContent='';
+    $('previewName').textContent='👤 '+s.full_name;
+    $('previewId').textContent='ID: '+s.id+' | ห้อง: '+cls;
+    $('studentPreview').classList.add('show');
+    playerName=s.full_name;playerId=s.id;playerClass=cls;
+    $('startBtn').disabled=false;
+  }catch(e){
+    $('idHint').textContent='❌ '+e.message;clearPreview();
+  }
+}
+
+function clearPreview(){
+  $('studentPreview').classList.remove('show');
+  $('previewName').textContent='';$('previewId').textContent='';
+  playerName='';playerId=0;$('startBtn').disabled=true;
+}
+
+// ===== START =====
+async function startGame(){
+  if(!playerName||!playerId||!playerClass)return;
+  gameScore=0;gameCorrect=0;gameAnswered=false;gameIdx=0;gameReview=[];scoreSubmitted=false;progressRowId=null;
+  $('playerBadge').textContent='👤 '+playerName+' ('+playerClass+')';
+  $('score').textContent=0;$('correct').textContent=0;$('nextBtn').textContent='ข้อต่อไป';
+  $('game').classList.remove('hidden');
+  document.querySelector('.toolbar').classList.remove('hidden');
+  $('end').classList.remove('show');
+  $('submitBtn').disabled=false;$('submitBtn').textContent='ส่งคะแนน';$('submitStatus').textContent='';
+  showScreen('gameScreen');
+  render();
+  // upsert progress row
+  await upsertProgress(0,0,false);
+  // start realtime map
+  startMcMap();
+  scrollTo({top:0,behavior:'smooth'});
+}
+
+// ===== PROGRESS (realtime map data) =====
+async function upsertProgress(q,sc,finished){
+  try{
+    // delete old row for this student first, then insert fresh
+    await sbFetch('game_progress','student_id=eq.'+playerId+'&class_id=eq.'+encodeURIComponent(playerClass),'DELETE');
+    const r=await fetch(SB+'/game_progress',{
+      method:'POST',
+      headers:{...H,'Prefer':'return=representation'},
+      body:JSON.stringify({student_id:playerId,student_name:playerName,class_id:playerClass,current_question:q,score:sc,finished:finished,ts:Date.now()})
+    });
+    const rows=await r.json();
+    if(rows&&rows[0])progressRowId=rows[0].id;
+  }catch(e){console.warn('progress err',e)}
+}
+
+// ===== MINECRAFT CANVAS RENDERER =====
+const MC_COLORS=[
+  '#6366f1','#f59e0b','#10b981','#ef4444','#8b5cf6',
+  '#06b6d4','#f97316','#ec4899','#14b8a6','#84cc16',
+  '#3b82f6','#a855f7','#22c55e','#f43f5e','#0ea5e9'
+];
+const GRASS_COLOR='#4ade80';
+const DIRT_COLOR='#92400e';
+const SKY_COLOR='#bae6fd';
+const STONE_COLOR='#94a3b8';
+const FINISH_COLOR='#fbbf24';
+const BLOCK_W=40; const BLOCK_H=20; const CHAR_H=36;
+const LANE_H=70; const PAD_LEFT=140; const PAD_TOP=10;
+
+function drawBlock(ctx,x,y,color,dark){
+  ctx.fillStyle=color;
+  ctx.fillRect(x,y,BLOCK_W-2,BLOCK_H-2);
+  ctx.fillStyle=dark||'rgba(0,0,0,0.18)';
+  ctx.fillRect(x,y+BLOCK_H-4,BLOCK_W-2,4);
+  ctx.fillStyle='rgba(255,255,255,0.22)';
+  ctx.fillRect(x,y,BLOCK_W-2,4);
+}
+
+function drawChar(ctx,x,y,color,letter,isMe){
+  // shadow
+  ctx.fillStyle='rgba(0,0,0,0.18)';
+  ctx.fillRect(x-10,y+CHAR_H-4,22,4);
+  // body
+  ctx.fillStyle=color;
+  ctx.fillRect(x-6,y+14,14,16);
+  // head
+  ctx.fillStyle=color;
+  ctx.fillRect(x-7,y,16,14);
+  // face bg
+  ctx.fillStyle='#fde68a';
+  ctx.fillRect(x-5,y+2,12,10);
+  // eyes
+  ctx.fillStyle='#1e293b';
+  ctx.fillRect(x-3,y+4,3,3);
+  ctx.fillRect(x+2,y+4,3,3);
+  // mouth
+  ctx.fillStyle='#dc2626';
+  ctx.fillRect(x-2,y+9,6,2);
+  // legs
+  ctx.fillStyle=color;
+  ctx.fillRect(x-6,y+30,6,8);
+  ctx.fillRect(x+2,y+30,6,8);
+  // name tag
+  const name=letter;
+  ctx.font='bold 10px monospace';
+  ctx.textAlign='center';
+  const tw=ctx.measureText(name).width+8;
+  ctx.fillStyle='rgba(0,0,0,0.55)';
+  ctx.fillRect(x+1-tw/2,y-16,tw,14);
+  ctx.fillStyle='#fff';
+  ctx.fillText(name,x+1,y-5);
+  // me star
+  if(isMe){
+    ctx.fillStyle='#fbbf24';
+    ctx.font='11px serif';
+    ctx.fillText('★',x+1,y-20);
+  }
+  ctx.textAlign='left';
+}
+
+function drawMcMap(canvasId,legendId,rows,myId){
+  const canvas=$(canvasId);
+  if(!canvas)return;
+  const n=rows.length;
+  if(n===0){
+    canvas.width=400;canvas.height=60;
+    const ctx=canvas.getContext('2d');
+    ctx.fillStyle=SKY_COLOR;ctx.fillRect(0,0,400,60);
+    ctx.fillStyle='#64748b';ctx.font='14px sans-serif';ctx.textAlign='center';
+    ctx.fillText('รอเพื่อนเข้าเล่น...',200,35);
+    return;
+  }
+  const W=PAD_LEFT+(TOTAL_Q+2)*BLOCK_W+60;
+  const H=PAD_TOP+n*LANE_H+20;
+  canvas.width=W;canvas.height=H;
+  const ctx=canvas.getContext('2d');
+
+  // sky bg
+  ctx.fillStyle=SKY_COLOR;
+  ctx.fillRect(0,0,W,H);
+
+  // clouds
+  ctx.fillStyle='rgba(255,255,255,0.7)';
+  for(let c=0;c<4;c++){
+    const cx=80+c*180,cy=15;
+    ctx.beginPath();ctx.arc(cx,cy,18,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.arc(cx+20,cy-5,13,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.arc(cx+38,cy,16,0,Math.PI*2);ctx.fill();
+  }
+
+  rows.forEach((r,i)=>{
+    const color=MC_COLORS[i%MC_COLORS.length];
+    const baseY=PAD_TOP+i*LANE_H;
+    const groundY=baseY+CHAR_H+8;
+    const cur=Math.min(r.current_question,TOTAL_Q);
+
+    // name label left
+    ctx.fillStyle='rgba(255,255,255,0.88)';
+    ctx.fillRect(2,baseY+10,PAD_LEFT-8,32);
+    ctx.fillStyle='#1e293b';
+    ctx.font='bold 11px "Prompt",sans-serif';
+    ctx.textAlign='left';
+    const shortName=r.student_name.length>12?r.student_name.substring(0,12)+'…':r.student_name;
+    ctx.fillText(shortName,6,baseY+22);
+    ctx.fillStyle='#64748b';
+    ctx.font='10px monospace';
+    ctx.fillText('ข้อ '+cur+'/'+TOTAL_Q+(r.finished?' ✓':''),6,baseY+36);
+
+    // draw ground blocks
+    for(let q=0;q<=TOTAL_Q;q++){
+      const bx=PAD_LEFT+q*BLOCK_W;
+      let topC,botC;
+      if(q<cur){topC=GRASS_COLOR;botC='#16a34a';}
+      else if(q===TOTAL_Q){topC=FINISH_COLOR;botC='#d97706';}
+      else{topC='#d1fae5';botC='#a7f3d0';}
+      drawBlock(ctx,bx,groundY,topC,botC);
+      drawBlock(ctx,bx,groundY+BLOCK_H,'#78350f','#451a03');
+      // question number
+      if(q>0&&q<=TOTAL_Q&&q%3===0){
+        ctx.fillStyle='rgba(0,0,0,0.35)';
+        ctx.font='8px monospace';
+        ctx.textAlign='center';
+        ctx.fillText(q,bx+BLOCK_W/2,groundY+BLOCK_H*2+10);
+        ctx.textAlign='left';
+      }
+    }
+
+    // finish flag
+    const fx=PAD_LEFT+TOTAL_Q*BLOCK_W+4;
+    ctx.fillStyle='#dc2626';
+    ctx.fillRect(fx,groundY-24,3,24);
+    ctx.fillStyle='#fbbf24';
+    ctx.fillRect(fx+3,groundY-24,14,10);
+
+    // character at current position
+    const charX=PAD_LEFT+cur*BLOCK_W+BLOCK_W/2;
+    const charY=groundY-CHAR_H-2;
+    const isMe=r.student_id===myId;
+    drawChar(ctx,charX,charY,color,r.student_name.charAt(0),isMe);
+
+    // separator line
+    if(i<n-1){
+      ctx.strokeStyle='rgba(0,0,0,0.06)';
+      ctx.lineWidth=1;
+      ctx.beginPath();ctx.moveTo(0,baseY+LANE_H-2);ctx.lineTo(W,baseY+LANE_H-2);ctx.stroke();
+    }
+  });
+
+  // legend
+  if(legendId){
+    const leg=$(legendId);
+    if(leg) leg.innerHTML=rows.map((r,i)=>`<span style="display:inline-flex;align-items:center;gap:4px"><span style="width:12px;height:12px;border-radius:3px;background:${MC_COLORS[i%MC_COLORS.length]};display:inline-block"></span>${esc(r.student_name.split(' ')[0])}</span>`).join('');
+  }
+}
+
+// ===== MINECRAFT MAP (in game) =====
+function startMcMap(){
+  renderMcMap();
+  mcInterval=setInterval(renderMcMap,5000);
+}
+
+async function renderMcMap(){
+  try{
+    const rows=await sbFetch('game_progress','class_id=eq.'+encodeURIComponent(playerClass)+'&order=current_question.desc,student_name.asc&limit=30');
+    drawMcMap('mcCanvas','mcLegend',rows||[],playerId);
+  }catch(e){console.warn('mc map err',e)}
+}
+
+// ===== TEACHER MODAL =====
+function openTeacherModal(){$('pwInput').value='';$('pwError').textContent='';$('teacherModal').style.display='flex';setTimeout(()=>$('pwInput').focus(),100)}
+function closeTeacherModal(){$('teacherModal').style.display='none'}
+function checkTeacherPw(){
+  if($('pwInput').value===TEACHER_PW){closeTeacherModal();openLeaderboard()}
+  else{$('pwError').textContent='รหัสผ่านไม่ถูกต้อง';$('pwInput').select()}
+}
+
+// ===== LEADERBOARD =====
+function openLeaderboard(){
+  showScreen('lbScreen');
+  loadAll();
+  lbInterval=setInterval(loadAll,5000);
+}
+
+function goHome(){
+  clearInterval(lbInterval);clearInterval(mcInterval);
+  showScreen('loginScreen');
+}
+
+async function loadAll(){
+  await Promise.all([loadLeaderboard(),loadMcLbMap()]);
+}
+
+async function loadLeaderboard(){
+  const filter=$('classFilter').value;
+  const tbody=$('lbBody');
+  try{
+    let params='order=score.desc,ts.asc&limit=300';
+    if(filter)params+='&class=eq.'+encodeURIComponent(filter);
+    const all=await sbFetch('game_scores',params);
+    const best={};
+    all.forEach(s=>{const k=s.student_id+'|'+s.class;if(!best[k]||s.score>best[k].score)best[k]=s});
+    const attempts={};
+    all.forEach(s=>{const k=s.student_id+'|'+s.class;attempts[k]=(attempts[k]||0)+1});
+    let rows=Object.values(best).sort((a,b)=>b.score-a.score||a.student_name?.localeCompare(b.student_name,'th')||0);
+    if(rows.length===0){tbody.innerHTML='<tr><td colspan="6" class="lb-empty">ยังไม่มีคะแนน</td></tr>';$('lastUpdate').textContent='';return}
+    tbody.innerHTML=rows.map((r,idx)=>{
+      const k=r.student_id+'|'+r.class;
+      const att=attempts[k]||1;
+      const medals=['🥇','🥈','🥉'];
+      const medal=medals[idx]||'';
+      const rc=idx<3?'rank-'+(idx+1):'';
+      const bw=Math.round(r.score/15*110);
+      return`<tr class="${rc}">
+        <td><span class="rank-medal">${medal||'<span style="color:#94a3b8;font-size:13px">'+(idx+1)+'</span>'}</span></td>
+        <td><b>${esc(r.student_name||'-')}</b></td>
+        <td><span style="font-size:12px;color:#64748b">${r.student_id||''}</span></td>
+        <td><span class="class-tag">${esc(r.class)}</span></td>
+        <td><div class="score-bar-wrap"><div class="score-bar" style="width:${bw}px"></div><span>${r.score}/15</span></div></td>
+        <td><span class="attempt-tag">ครั้งที่ ${att}</span></td>
+      </tr>`;
+    }).join('');
+    $('lastUpdate').textContent='อัปเดตล่าสุด: '+new Date().toLocaleTimeString('th-TH');
+  }catch(e){tbody.innerHTML='<tr><td colspan="6" class="lb-empty">❌ '+esc(e.message)+'</td></tr>'}
+}
+
+async function loadMcLbMap(){
+  const filter=$('classFilter').value;
+  try{
+    let params='order=current_question.desc,student_name.asc&limit=100';
+    if(filter)params+='&class_id=eq.'+encodeURIComponent(filter);
+    const rows=await sbFetch('game_progress',params);
+    drawMcMap('mcLbCanvas','mcLbLegend',rows||[],null);
+  }catch(e){console.warn('lb map err',e)}
+}
+
+// ===== EXPORT EXCEL =====
+async function exportExcel(){
+  try{
+    const filter=$('classFilter').value;
+    let params='order=class.asc,score.desc,student_name.asc&limit=500';
+    if(filter)params+='&class=eq.'+encodeURIComponent(filter);
+    const all=await sbFetch('game_scores',params);
+    if(!all||all.length===0){alert('ไม่มีข้อมูล');return}
+    const wsData=[['ลำดับ','รหัสนักเรียน (ID)','ชื่อ-นามสกุล','ห้อง','คะแนน','ตอบถูก','ครั้งที่','วันเวลา']];
+    all.forEach((r,i)=>{
+      wsData.push([
+        i+1,
+        r.student_id||'',
+        r.student_name||'',
+        r.class||'',
+        r.score,
+        r.correct,
+        r.attempt,
+        new Date(r.ts).toLocaleString('th-TH')
+      ]);
+    });
+    const wb=XLSX.utils.book_new();
+    const ws=XLSX.utils.aoa_to_sheet(wsData);
+    ws['!cols']=[{wch:6},{wch:18},{wch:28},{wch:8},{wch:8},{wch:10},{wch:8},{wch:22}];
+    XLSX.utils.book_append_sheet(wb,ws,'คะแนนเกมแรงแม่เหล็ก');
+    XLSX.writeFile(wb,'game_scores_magnetic_force.xlsx');
+  }catch(e){alert('Export ไม่สำเร็จ: '+e.message)}
+}
+
+async function confirmResetScores(){
+  if(confirm('ลบคะแนนทั้งหมดใน game_scores หรือไม่?')){
+    try{await sbFetch('game_scores','id=gte.0','DELETE');loadLeaderboard()}
+    catch(e){alert('ลบไม่สำเร็จ: '+e.message)}
+  }
+}
+async function confirmResetProgress(){
+  if(confirm('ล้าง Progress map ทั้งหมดหรือไม่?')){
+    try{await sbFetch('game_progress','id=gte.0','DELETE');loadMcLbMap()}
+    catch(e){alert('ล้างไม่สำเร็จ: '+e.message)}
+  }
+}
+
+// ===== SCORE SUBMISSION =====
+async function submitScore(){
+  if(scoreSubmitted)return;
+  $('submitBtn').disabled=true;$('submitStatus').textContent='⏳ กำลังบันทึก...';
+  try{
+    const prev=await sbFetch('game_scores','select=id&student_id=eq.'+playerId+'&class=eq.'+encodeURIComponent(playerClass));
+    const att=(prev||[]).length+1;
+    await fetch(SB+'/game_scores',{method:'POST',headers:{...H,'Prefer':'return=minimal'},
+      body:JSON.stringify({student_id:playerId,student_name:playerName,class:playerClass,score:gameScore,correct:gameCorrect,attempt:att,ts:Date.now()})});
+    scoreSubmitted=true;
+    $('submitStatus').textContent='✅ บันทึกสำเร็จ! (ครั้งที่ '+att+')';
+    $('submitBtn').textContent='✅ ส่งแล้ว';
+  }catch(e){$('submitBtn').disabled=false;$('submitStatus').textContent='❌ '+e.message}
+}
+
+// ===== QUESTIONS =====
 const questions=[
 {text:"โปรตอนอยู่นิ่งในสนามแม่เหล็ก",answer:"zero",icon:"➕",visual:"มีประจุไฟฟ้า แต่ไม่เคลื่อนที่ จึงมี v = 0",reason:"แรงเป็นศูนย์ เพราะแม้โปรตอนมีประจุบวก แต่อนุภาคอยู่นิ่ง ทำให้ v = 0"},
 {text:"อิเล็กตรอนเคลื่อนที่ขนานกับสนามแม่เหล็ก",answer:"zero",icon:"➖",visual:"v ขนานกับ B ทำให้มุม θ = 0°",reason:"แรงเป็นศูนย์ เพราะเคลื่อนที่ขนานกับสนามแม่เหล็ก ทำให้ sin0° = 0"},
@@ -147,38 +780,68 @@ const questions=[
 {text:"ไอออนบวกเคลื่อนที่ผ่านสนามแม่เหล็กโดยทำมุม 45°",answer:"nonzero",icon:"➕",visual:"ไอออนมีประจุ และทำมุมกับ B",reason:"แรงไม่เป็นศูนย์ เพราะไอออนมีประจุและเคลื่อนที่ทำมุมกับสนามแม่เหล็ก"},
 {text:"อิเล็กตรอนเคลื่อนที่ในทิศเดียวกับสนามแม่เหล็ก",answer:"zero",icon:"➡️",visual:"v ไปทิศเดียวกับ B คือ θ = 0°",reason:"แรงเป็นศูนย์ เพราะเคลื่อนที่ในทิศเดียวกับสนามแม่เหล็ก หรือ v ขนานกับ B"}
 ];
-let i=0,score=0,correct=0,answered=false,review=[];
-const $=id=>document.getElementById(id);
-$("total").textContent=questions.length;
+
+// ===== GAME LOGIC =====
 function render(){
- const x=questions[i];
- $("q").textContent=x.text;$("current").textContent=i+1;$("cardNo").textContent="บัตรที่ "+(i+1);
- $("icon").textContent=x.icon;$("visual").textContent=x.visual;$("feedback").className="feedback";$("feedback").innerHTML="";
- ["zeroBtn","nonzeroBtn"].forEach(id=>{$(id).classList.remove("correct","wrong");$(id).disabled=false});
- $("nextBtn").disabled=true;answered=false;$("bar").style.width=(i/questions.length*100)+"%";
+  const x=questions[gameIdx];
+  $('q').textContent=x.text;$('current').textContent=gameIdx+1;$('cardNo').textContent='บัตรที่ '+(gameIdx+1);
+  $('icon').textContent=x.icon;$('visual').textContent=x.visual;
+  $('feedback').className='feedback';$('feedback').innerHTML='';
+  ['zeroBtn','nonzeroBtn'].forEach(id=>{$(id).classList.remove('correct','wrong');$(id).disabled=false});
+  $('nextBtn').disabled=true;gameAnswered=false;
+  $('bar').style.width=(gameIdx/TOTAL_Q*100)+'%';
 }
-function answer(choice){
- if(answered)return;answered=true;const x=questions[i];const ok=choice===x.answer;
- if(ok){score++;correct++;$("feedback").className="feedback show good";$("feedback").innerHTML="✅ ถูกต้อง!<br>"+x.reason}
- else{$("feedback").className="feedback show bad";$("feedback").innerHTML="❌ ยังไม่ถูก<br>คำตอบที่ถูกคือ <b>"+(x.answer==="zero"?"แรงเป็นศูนย์":"แรงไม่เป็นศูนย์")+"</b><br>"+x.reason}
- $(x.answer==="zero"?"zeroBtn":"nonzeroBtn").classList.add("correct");
- if(!ok)$(choice==="zero"?"zeroBtn":"nonzeroBtn").classList.add("wrong");
- $("zeroBtn").disabled=true;$("nonzeroBtn").disabled=true;$("nextBtn").disabled=false;
- $("score").textContent=score;$("correct").textContent=correct;$("nextBtn").textContent=i===questions.length-1?"ดูผลคะแนน":"ข้อต่อไป";
- review[i]={text:x.text,ok,answer:x.answer,reason:x.reason};
+
+async function answer(choice){
+  if(gameAnswered)return;gameAnswered=true;
+  const x=questions[gameIdx];const ok=choice===x.answer;
+  if(ok){gameScore++;gameCorrect++;$('feedback').className='feedback show good';$('feedback').innerHTML='✅ ถูกต้อง!<br>'+x.reason}
+  else{$('feedback').className='feedback show bad';$('feedback').innerHTML='❌ ยังไม่ถูก<br>คำตอบที่ถูกคือ <b>'+(x.answer==='zero'?'แรงเป็นศูนย์':'แรงไม่เป็นศูนย์')+'</b><br>'+x.reason}
+  $(x.answer==='zero'?'zeroBtn':'nonzeroBtn').classList.add('correct');
+  if(!ok)$(choice==='zero'?'zeroBtn':'nonzeroBtn').classList.add('wrong');
+  $('zeroBtn').disabled=true;$('nonzeroBtn').disabled=true;$('nextBtn').disabled=false;
+  $('score').textContent=gameScore;$('correct').textContent=gameCorrect;
+  $('nextBtn').textContent=gameIdx===TOTAL_Q-1?'ดูผลคะแนน':'ข้อต่อไป';
+  gameReview[gameIdx]={text:x.text,ok,answer:x.answer,reason:x.reason};
+  // update progress
+  await upsertProgress(gameIdx+1,gameScore,false);
 }
-function next(){if(i<questions.length-1){i++;render()}else showEnd()}
-function showEnd(){
- $("game").classList.add("hidden");document.querySelector(".toolbar").classList.add("hidden");$("end").classList.add("show");$("final").textContent=score;
- $("message").textContent=score>=13?"ยอดเยี่ยมมาก! วิเคราะห์ q, v, B และ θ ได้แม่นยำ":score>=10?"ดีมาก! เข้าใจหลักแรงแม่เหล็กแล้ว":score>=7?"พอใช้ได้ ลองจำเงื่อนไขแรงเป็นศูนย์ให้แม่นขึ้น":"ควรทบทวนหลัก F = |q|vBsinθ อีกครั้ง";
- $("review").innerHTML="";review.forEach((r,n)=>{let d=document.createElement("div");d.className="item "+(r.ok?"ok":"no");d.innerHTML=`<b>ข้อ ${n+1}:</b> ${r.text}<br><b>เฉลย:</b> ${r.answer==="zero"?"แรงเป็นศูนย์":"แรงไม่เป็นศูนย์"}<br>${r.reason}`;$("review").appendChild(d)});
- scrollTo({top:0,behavior:"smooth"});
+
+async function next(){
+  if(gameIdx<TOTAL_Q-1){gameIdx++;render()}
+  else await showEnd();
 }
-function restart(){
- i=0;score=0;correct=0;answered=false;review=[];$("score").textContent=0;$("correct").textContent=0;$("nextBtn").textContent="ข้อต่อไป";
- $("game").classList.remove("hidden");document.querySelector(".toolbar").classList.remove("hidden");$("end").classList.remove("show");render();scrollTo({top:0,behavior:"smooth"});
+
+async function showEnd(){
+  clearInterval(mcInterval);
+  await upsertProgress(TOTAL_Q,gameScore,true);
+  $('game').classList.add('hidden');document.querySelector('.toolbar').classList.add('hidden');
+  $('end').classList.add('show');$('final').textContent=gameScore;
+  $('message').textContent=gameScore>=13?'ยอดเยี่ยมมาก! วิเคราะห์ได้แม่นยำ':gameScore>=10?'ดีมาก! เข้าใจหลักแรงแม่เหล็กแล้ว':gameScore>=7?'พอใช้ได้ ลองทบทวนเพิ่มเติม':'ควรทบทวนหลัก F = |q|vBsinθ อีกครั้ง';
+  $('submitInfo').textContent='ชื่อ: '+playerName+' | ID: '+playerId+' | ห้อง: '+playerClass+' | คะแนน: '+gameScore+'/15';
+  $('review').innerHTML='';
+  gameReview.forEach((r,n)=>{
+    let d=document.createElement('div');d.className='item '+(r.ok?'ok':'no');
+    d.innerHTML=`<b>ข้อ ${n+1}:</b> ${r.text}<br><b>เฉลย:</b> ${r.answer==='zero'?'แรงเป็นศูนย์':'แรงไม่เป็นศูนย์'}<br>${r.reason}`;
+    $('review').appendChild(d);
+  });
+  scrollTo({top:0,behavior:'smooth'});
 }
-render();
+
+function confirmRestart(){
+  if(gameIdx>0&&!$('end').classList.contains('show')){if(!confirm('เริ่มใหม่? คะแนนปัจจุบันจะหาย'))return}
+  clearInterval(mcInterval);
+  scoreSubmitted=false;gameScore=0;gameCorrect=0;gameAnswered=false;gameReview=[];gameIdx=0;
+  $('score').textContent=0;$('correct').textContent=0;$('nextBtn').textContent='ข้อต่อไป';
+  $('game').classList.remove('hidden');document.querySelector('.toolbar').classList.remove('hidden');
+  $('end').classList.remove('show');$('submitBtn').disabled=false;$('submitBtn').textContent='ส่งคะแนน';$('submitStatus').textContent='';
+  render();
+  upsertProgress(0,0,false);
+  startMcMap();
+  scrollTo({top:0,behavior:'smooth'});
+}
+
+function esc(s){if(!s)return'';return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 </script>
 </body>
 </html>
