@@ -371,7 +371,7 @@ let progressRowId=null,lbInterval=null,mcInterval=null;
 let allStudentsCache=[];
 
 const $=id=>document.getElementById(id);
-$('total').textContent=TOTAL_Q;
+function debounce(fn,ms){let t;return function(...a){clearTimeout(t);t=setTimeout(()=>fn(...a),ms)}}
 
 // ===== SCREEN =====
 function showScreen(id){
@@ -379,12 +379,14 @@ function showScreen(id){
   $(id).classList.add('active');
 }
 
-// ===== LOGIN =====
-$('idInput').addEventListener('input',debounce(lookupStudent,500));
-$('classSelect').addEventListener('change',()=>{$('idInput').value='';clearPreview();onClassChange()});
-$('pwInput').addEventListener('keydown',e=>{if(e.key==='Enter')checkTeacherPw()});
-
-function debounce(fn,ms){let t;return function(...a){clearTimeout(t);t=setTimeout(()=>fn(...a),ms)}}
+// ===== INIT =====
+window.addEventListener('DOMContentLoaded',()=>{
+  showScreen('loginScreen');
+  $('total').textContent=TOTAL_Q;
+  $('idInput').addEventListener('input',debounce(lookupStudent,600));
+  $('classSelect').addEventListener('change',()=>{$('idInput').value='';clearPreview();onClassChange()});
+  $('pwInput').addEventListener('keydown',e=>{if(e.key==='Enter')checkTeacherPw()});
+});
 
 function onClassChange(){
   $('idInput').value='';clearPreview();
@@ -417,7 +419,7 @@ async function lookupStudent(){
     playerName=s.full_name;playerId=s.id;playerClass=cls;
     $('startBtn').disabled=false;
   }catch(e){
-    $('idHint').textContent='❌ เกิดข้อผิดพลาด';clearPreview();
+    $('idHint').textContent='❌ '+e.message;clearPreview();
   }
 }
 
