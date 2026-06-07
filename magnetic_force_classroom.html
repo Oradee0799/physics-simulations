@@ -276,8 +276,9 @@ ul{margin:7px 0 0;padding-left:20px;font-size:clamp(14px,3vw,16px);line-height:1
 
 <!-- MINECRAFT REALTIME MAP (in game) -->
 <div class="mc-panel" id="mcPanel">
-  <h2>🗺️ แผนที่ห้องเรียน — Real-time</h2>
-  <div class="mc-players" id="mcPlayers"><div style="color:#94a3b8;font-size:13px;padding:8px">กำลังโหลด...</div></div>
+  <h2>🎮 แผนที่ห้องเรียน Real-time</h2>
+  <canvas id="mcCanvas" style="width:100%;border-radius:12px;display:block;image-rendering:pixelated"></canvas>
+  <div id="mcLegend" style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;font-size:12px;font-weight:800;color:#475569"></div>
 </div>
 
 <section class="end" id="end">
@@ -308,7 +309,8 @@ ul{margin:7px 0 0;padding-left:20px;font-size:clamp(14px,3vw,16px);line-height:1
     <!-- BIG MINECRAFT MAP for teacher -->
     <div class="mc-lb-map">
       <h3>🎮 แผนที่ Real-time — ทุกคนในห้อง</h3>
-      <div class="mc-lb-rows" id="mcLbRows"><div style="color:#64748b;font-size:13px">กำลังโหลด...</div></div>
+      <canvas id="mcLbCanvas" style="width:100%;border-radius:12px;display:block;image-rendering:pixelated"></canvas>
+      <div id="mcLbLegend" style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;font-size:12px;font-weight:800;color:#475569"></div>
     </div>
 
     <div class="lb-controls">
@@ -463,6 +465,166 @@ async function upsertProgress(q,sc,finished){
   }catch(e){console.warn('progress err',e)}
 }
 
+// ===== MINECRAFT CANVAS RENDERER =====
+const MC_COLORS=[
+  '#6366f1','#f59e0b','#10b981','#ef4444','#8b5cf6',
+  '#06b6d4','#f97316','#ec4899','#14b8a6','#84cc16',
+  '#3b82f6','#a855f7','#22c55e','#f43f5e','#0ea5e9'
+];
+const GRASS_COLOR='#4ade80';
+const DIRT_COLOR='#92400e';
+const SKY_COLOR='#bae6fd';
+const STONE_COLOR='#94a3b8';
+const FINISH_COLOR='#fbbf24';
+const BLOCK_W=40; const BLOCK_H=20; const CHAR_H=36;
+const LANE_H=70; const PAD_LEFT=140; const PAD_TOP=10;
+
+function drawBlock(ctx,x,y,color,dark){
+  ctx.fillStyle=color;
+  ctx.fillRect(x,y,BLOCK_W-2,BLOCK_H-2);
+  ctx.fillStyle=dark||'rgba(0,0,0,0.18)';
+  ctx.fillRect(x,y+BLOCK_H-4,BLOCK_W-2,4);
+  ctx.fillStyle='rgba(255,255,255,0.22)';
+  ctx.fillRect(x,y,BLOCK_W-2,4);
+}
+
+function drawChar(ctx,x,y,color,letter,isMe){
+  // shadow
+  ctx.fillStyle='rgba(0,0,0,0.18)';
+  ctx.fillRect(x-10,y+CHAR_H-4,22,4);
+  // body
+  ctx.fillStyle=color;
+  ctx.fillRect(x-6,y+14,14,16);
+  // head
+  ctx.fillStyle=color;
+  ctx.fillRect(x-7,y,16,14);
+  // face bg
+  ctx.fillStyle='#fde68a';
+  ctx.fillRect(x-5,y+2,12,10);
+  // eyes
+  ctx.fillStyle='#1e293b';
+  ctx.fillRect(x-3,y+4,3,3);
+  ctx.fillRect(x+2,y+4,3,3);
+  // mouth
+  ctx.fillStyle='#dc2626';
+  ctx.fillRect(x-2,y+9,6,2);
+  // legs
+  ctx.fillStyle=color;
+  ctx.fillRect(x-6,y+30,6,8);
+  ctx.fillRect(x+2,y+30,6,8);
+  // name tag
+  const name=letter;
+  ctx.font='bold 10px monospace';
+  ctx.textAlign='center';
+  const tw=ctx.measureText(name).width+8;
+  ctx.fillStyle='rgba(0,0,0,0.55)';
+  ctx.fillRect(x+1-tw/2,y-16,tw,14);
+  ctx.fillStyle='#fff';
+  ctx.fillText(name,x+1,y-5);
+  // me star
+  if(isMe){
+    ctx.fillStyle='#fbbf24';
+    ctx.font='11px serif';
+    ctx.fillText('★',x+1,y-20);
+  }
+  ctx.textAlign='left';
+}
+
+function drawMcMap(canvasId,legendId,rows,myId){
+  const canvas=$(canvasId);
+  if(!canvas)return;
+  const n=rows.length;
+  if(n===0){
+    canvas.width=400;canvas.height=60;
+    const ctx=canvas.getContext('2d');
+    ctx.fillStyle=SKY_COLOR;ctx.fillRect(0,0,400,60);
+    ctx.fillStyle='#64748b';ctx.font='14px sans-serif';ctx.textAlign='center';
+    ctx.fillText('รอเพื่อนเข้าเล่น...',200,35);
+    return;
+  }
+  const W=PAD_LEFT+(TOTAL_Q+2)*BLOCK_W+60;
+  const H=PAD_TOP+n*LANE_H+20;
+  canvas.width=W;canvas.height=H;
+  const ctx=canvas.getContext('2d');
+
+  // sky bg
+  ctx.fillStyle=SKY_COLOR;
+  ctx.fillRect(0,0,W,H);
+
+  // clouds
+  ctx.fillStyle='rgba(255,255,255,0.7)';
+  for(let c=0;c<4;c++){
+    const cx=80+c*180,cy=15;
+    ctx.beginPath();ctx.arc(cx,cy,18,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.arc(cx+20,cy-5,13,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.arc(cx+38,cy,16,0,Math.PI*2);ctx.fill();
+  }
+
+  rows.forEach((r,i)=>{
+    const color=MC_COLORS[i%MC_COLORS.length];
+    const baseY=PAD_TOP+i*LANE_H;
+    const groundY=baseY+CHAR_H+8;
+    const cur=Math.min(r.current_question,TOTAL_Q);
+
+    // name label left
+    ctx.fillStyle='rgba(255,255,255,0.88)';
+    ctx.fillRect(2,baseY+10,PAD_LEFT-8,32);
+    ctx.fillStyle='#1e293b';
+    ctx.font='bold 11px "Prompt",sans-serif';
+    ctx.textAlign='left';
+    const shortName=r.student_name.length>12?r.student_name.substring(0,12)+'…':r.student_name;
+    ctx.fillText(shortName,6,baseY+22);
+    ctx.fillStyle='#64748b';
+    ctx.font='10px monospace';
+    ctx.fillText('ข้อ '+cur+'/'+TOTAL_Q+(r.finished?' ✓':''),6,baseY+36);
+
+    // draw ground blocks
+    for(let q=0;q<=TOTAL_Q;q++){
+      const bx=PAD_LEFT+q*BLOCK_W;
+      let topC,botC;
+      if(q<cur){topC=GRASS_COLOR;botC='#16a34a';}
+      else if(q===TOTAL_Q){topC=FINISH_COLOR;botC='#d97706';}
+      else{topC='#d1fae5';botC='#a7f3d0';}
+      drawBlock(ctx,bx,groundY,topC,botC);
+      drawBlock(ctx,bx,groundY+BLOCK_H,'#78350f','#451a03');
+      // question number
+      if(q>0&&q<=TOTAL_Q&&q%3===0){
+        ctx.fillStyle='rgba(0,0,0,0.35)';
+        ctx.font='8px monospace';
+        ctx.textAlign='center';
+        ctx.fillText(q,bx+BLOCK_W/2,groundY+BLOCK_H*2+10);
+        ctx.textAlign='left';
+      }
+    }
+
+    // finish flag
+    const fx=PAD_LEFT+TOTAL_Q*BLOCK_W+4;
+    ctx.fillStyle='#dc2626';
+    ctx.fillRect(fx,groundY-24,3,24);
+    ctx.fillStyle='#fbbf24';
+    ctx.fillRect(fx+3,groundY-24,14,10);
+
+    // character at current position
+    const charX=PAD_LEFT+cur*BLOCK_W+BLOCK_W/2;
+    const charY=groundY-CHAR_H-2;
+    const isMe=r.student_id===myId;
+    drawChar(ctx,charX,charY,color,r.student_name.charAt(0),isMe);
+
+    // separator line
+    if(i<n-1){
+      ctx.strokeStyle='rgba(0,0,0,0.06)';
+      ctx.lineWidth=1;
+      ctx.beginPath();ctx.moveTo(0,baseY+LANE_H-2);ctx.lineTo(W,baseY+LANE_H-2);ctx.stroke();
+    }
+  });
+
+  // legend
+  if(legendId){
+    const leg=$(legendId);
+    if(leg) leg.innerHTML=rows.map((r,i)=>`<span style="display:inline-flex;align-items:center;gap:4px"><span style="width:12px;height:12px;border-radius:3px;background:${MC_COLORS[i%MC_COLORS.length]};display:inline-block"></span>${esc(r.student_name.split(' ')[0])}</span>`).join('');
+  }
+}
+
 // ===== MINECRAFT MAP (in game) =====
 function startMcMap(){
   renderMcMap();
@@ -471,22 +633,8 @@ function startMcMap(){
 
 async function renderMcMap(){
   try{
-    const cls=playerClass;
-    const rows=await sbFetch('game_progress','class_id=eq.'+encodeURIComponent(cls)+'&order=current_question.desc,student_name.asc&limit=50');
-    const container=$('mcPlayers');
-    if(!rows||rows.length===0){container.innerHTML='<div style="color:#94a3b8;font-size:13px;padding:8px">รอเพื่อนเข้าเล่น...</div>';return}
-    container.innerHTML=rows.map((r,i)=>{
-      const isMe=r.student_id===playerId;
-      const pct=Math.round(r.current_question/TOTAL_Q*100);
-      const avIdx=i%10;
-      const step=r.finished?'🏁 จบแล้ว':'ข้อ '+r.current_question+'/'+TOTAL_Q;
-      return`<div class="mc-player-row${isMe?' is-me':''}">
-        <div class="mc-avatar ${AV_COLORS[avIdx]}">${r.student_name.charAt(0)}</div>
-        <div class="mc-pname">${esc(r.student_name)}${isMe?' ⭐':''}</div>
-        <div class="mc-pstep">${step}</div>
-        <div class="mc-pbar-wrap"><div class="mc-pbar"><div class="mc-pbar-inner" style="width:${pct}%"></div></div></div>
-      </div>`;
-    }).join('');
+    const rows=await sbFetch('game_progress','class_id=eq.'+encodeURIComponent(playerClass)+'&order=current_question.desc,student_name.asc&limit=30');
+    drawMcMap('mcCanvas','mcLegend',rows||[],playerId);
   }catch(e){console.warn('mc map err',e)}
 }
 
@@ -549,29 +697,12 @@ async function loadLeaderboard(){
 
 async function loadMcLbMap(){
   const filter=$('classFilter').value;
-  const container=$('mcLbRows');
   try{
     let params='order=current_question.desc,student_name.asc&limit=100';
     if(filter)params+='&class_id=eq.'+encodeURIComponent(filter);
     const rows=await sbFetch('game_progress',params);
-    if(!rows||rows.length===0){container.innerHTML='<div style="color:#64748b;font-size:13px">ยังไม่มีผู้เล่น</div>';return}
-    container.innerHTML=rows.map((r,i)=>{
-      const avIdx=i%10;
-      const blocks=Array.from({length:TOTAL_Q},(_, qi)=>{
-        if(r.finished||qi<r.current_question)return`<div class="mc-lb-sq sq-done" title="ข้อ${qi+1}">✓</div>`;
-        if(qi===r.current_question&&!r.finished)return`<div class="mc-lb-sq sq-active">⬛</div>`;
-        return`<div class="mc-lb-sq sq-empty"></div>`;
-      }).join('');
-      const fin=r.finished?`<div class="mc-lb-sq sq-fin">🏁</div>`:'';
-      return`<div class="mc-lb-row">
-        <div class="mc-lb-name" title="${esc(r.student_name)}">
-          <span class="mc-avatar ${AV_COLORS[avIdx]}" style="width:22px;height:22px;border-radius:4px;font-size:12px;display:inline-flex;align-items:center;justify-content:center;color:#fff;margin-right:5px">${r.student_name.charAt(0)}</span>
-          ${esc(r.student_name.split(' ')[0])}
-        </div>
-        <div class="mc-lb-track">${blocks}${fin}</div>
-      </div>`;
-    }).join('');
-  }catch(e){container.innerHTML='<div style="color:#dc2626;font-size:13px">❌ '+esc(e.message)+'</div>'}
+    drawMcMap('mcLbCanvas','mcLbLegend',rows||[],null);
+  }catch(e){console.warn('lb map err',e)}
 }
 
 // ===== EXPORT EXCEL =====
