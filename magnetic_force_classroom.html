@@ -278,8 +278,24 @@ ul{margin:8px 0 0;padding-left:22px;font-size:clamp(15px,3.2vw,17px);line-height
 </div>
 
 <script>
-// ===== STORAGE KEY =====
-const STORAGE_KEY = 'magnetic_force_scores';
+// ===== SUPABASE CONFIG =====
+const SB_URL='https://nvwqfuliccdxgsmhmhrt.supabase.co/rest/v1';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im52d3FmdWxpY2NkeGdzbWhtaHJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMzEyNTQsImV4cCI6MjA5NDYwNzI1NH0.euNyFUCfhZsnlnzQcbYDrYTmakyeRqem3ZAkwBSGqsM';
+const SB_HEADERS={'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};
+
+async function sbGet(params=''){
+  const r=await fetch(SB_URL+'/game_scores?'+params,{headers:{...SB_HEADERS,'Accept':'application/json'}});
+  if(!r.ok)throw new Error(await r.text());
+  return r.json();
+}
+async function sbInsert(row){
+  const r=await fetch(SB_URL+'/game_scores',{method:'POST',headers:{...SB_HEADERS,'Prefer':'return=minimal'},body:JSON.stringify(row)});
+  if(!r.ok)throw new Error(await r.text());
+}
+async function sbDelete(){
+  const r=await fetch(SB_URL+'/game_scores?id=gte.0',{method:'DELETE',headers:SB_HEADERS});
+  if(!r.ok)throw new Error(await r.text());
+}
 
 // ===== QUESTIONS =====
 const questions=[
@@ -368,72 +384,74 @@ function openLeaderboard(){
   lbRefreshInterval=setInterval(loadLeaderboard,15000);
 }
 
-function getScores(){
-  try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]')}catch{return[]}
-}
-function saveScores(arr){localStorage.setItem(STORAGE_KEY,JSON.stringify(arr))}
-
-function loadLeaderboard(){
+async function loadLeaderboard(){
   const filter=$('classFilter').value;
-  let all=getScores();
-  if(filter)all=all.filter(s=>s.class===filter);
-  // best score per player
-  const best={};
-  all.forEach(s=>{
-    const key=s.name+'|'+s.class;
-    if(!best[key]||s.score>best[key].score||(s.score===best[key].score&&s.attempt>best[key].attempt))best[key]=s;
-  });
-  // count attempts per player
-  const attempts={};
-  getScores().forEach(s=>{const k=s.name+'|'+s.class;attempts[k]=(attempts[k]||0)+1});
-  let rows=Object.values(best).sort((a,b)=>b.score-a.score||a.name.localeCompare(b.name,'th'));
   const tbody=$('lbBody');
-  if(rows.length===0){tbody.innerHTML='<tr><td colspan="5" class="lb-empty">ยังไม่มีคะแนน เริ่มเล่นเพื่อขึ้น Leaderboard!</td></tr>';$('lastUpdate').textContent='';return}
-  const maxScore=rows[0]?.score||15;
-  tbody.innerHTML=rows.map((r,idx)=>{
-    const key=r.name+'|'+r.class;
-    const att=attempts[key]||1;
-    const medals=['🥇','🥈','🥉'];
-    const medal=medals[idx]||'';
-    const rankClass=idx<3?'rank-'+(idx+1):'';
-    const barW=Math.round(r.score/15*120);
-    return`<tr class="${rankClass}">
-      <td><span class="rank-medal">${medal||'<span style="color:#94a3b8;font-size:14px">'+(idx+1)+'</span>'}</span></td>
-      <td><b>${esc(r.name)}</b></td>
-      <td><span class="class-tag">${esc(r.class)}</span></td>
-      <td><div class="score-bar-wrap"><div class="score-bar" style="width:${barW}px"></div><span>${r.score}/15</span></div></td>
-      <td><span class="attempt-tag">ครั้งที่ ${att}</span></td>
-    </tr>`;
-  }).join('');
-  const t=new Date();
-  $('lastUpdate').textContent='อัปเดตล่าสุด: '+t.toLocaleTimeString('th-TH');
+  tbody.innerHTML='<tr><td colspan="5" class="lb-empty">⏳ กำลังโหลด...</td></tr>';
+  try{
+    let params='order=score.desc,ts.asc&limit=200';
+    if(filter)params+='&class=eq.'+encodeURIComponent(filter);
+    const all=await sbGet(params);
+    // best score per player
+    const best={};
+    all.forEach(s=>{
+      const key=s.name+'|'+s.class;
+      if(!best[key]||s.score>best[key].score)best[key]=s;
+    });
+    // count attempts per player (from full data)
+    const attempts={};
+    all.forEach(s=>{const k=s.name+'|'+s.class;attempts[k]=(attempts[k]||0)+1});
+    let rows=Object.values(best).sort((a,b)=>b.score-a.score||a.name.localeCompare(b.name,'th'));
+    if(rows.length===0){tbody.innerHTML='<tr><td colspan="5" class="lb-empty">ยังไม่มีคะแนน เริ่มเล่นเพื่อขึ้น Leaderboard!</td></tr>';$('lastUpdate').textContent='';return}
+    tbody.innerHTML=rows.map((r,idx)=>{
+      const key=r.name+'|'+r.class;
+      const att=attempts[key]||1;
+      const medals=['🥇','🥈','🥉'];
+      const medal=medals[idx]||'';
+      const rankClass=idx<3?'rank-'+(idx+1):'';
+      const barW=Math.round(r.score/15*120);
+      return`<tr class="${rankClass}">
+        <td><span class="rank-medal">${medal||'<span style="color:#94a3b8;font-size:14px">'+(idx+1)+'</span>'}</span></td>
+        <td><b>${esc(r.name)}</b></td>
+        <td><span class="class-tag">${esc(r.class)}</span></td>
+        <td><div class="score-bar-wrap"><div class="score-bar" style="width:${barW}px"></div><span>${r.score}/15</span></div></td>
+        <td><span class="attempt-tag">ครั้งที่ ${att}</span></td>
+      </tr>`;
+    }).join('');
+    const t=new Date();
+    $('lastUpdate').textContent='อัปเดตล่าสุด: '+t.toLocaleTimeString('th-TH');
+  }catch(e){
+    tbody.innerHTML='<tr><td colspan="5" class="lb-empty">❌ โหลดไม่สำเร็จ: '+e.message+'</td></tr>';
+  }
 }
 
 function esc(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 
-function confirmReset(){
+async function confirmReset(){
   if(confirm('ลบคะแนนทั้งหมดหรือไม่? (ไม่สามารถกู้คืนได้)')){
-    localStorage.removeItem(STORAGE_KEY);
-    loadLeaderboard();
+    try{
+      await sbDelete();
+      loadLeaderboard();
+    }catch(e){alert('ลบไม่สำเร็จ: '+e.message)}
   }
 }
 
 // ===== SCORE SUBMISSION =====
-function submitScore(){
+async function submitScore(){
   if(scoreSubmitted)return;
   $('submitBtn').disabled=true;
   $('submitStatus').textContent='⏳ กำลังบันทึก...';
   try{
-    const all=getScores();
-    const att=all.filter(s=>s.name===playerName&&s.class===playerClass).length+1;
-    all.push({name:playerName,class:playerClass,score:gameScore,correct:gameCorrect,attempt:att,ts:Date.now()});
-    saveScores(all);
+    // นับจำนวนครั้งที่เคยเล่น
+    const prev=await sbGet('select=id&name=eq.'+encodeURIComponent(playerName)+'&class=eq.'+encodeURIComponent(playerClass));
+    const att=(prev||[]).length+1;
+    await sbInsert({name:playerName,class:playerClass,score:gameScore,correct:gameCorrect,attempt:att,ts:Date.now()});
     scoreSubmitted=true;
     $('submitStatus').textContent='✅ บันทึกคะแนนสำเร็จ! (ครั้งที่ '+att+')';
     $('submitBtn').textContent='✅ ส่งแล้ว';
   }catch(e){
     $('submitBtn').disabled=false;
-    $('submitStatus').textContent='❌ เกิดข้อผิดพลาด ลองอีกครั้ง';
+    $('submitStatus').textContent='❌ เกิดข้อผิดพลาด: '+e.message;
   }
 }
 
