@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>เกมแรงเป็นศูนย์หรือไม่</title>
+<style>
+:root{
+  --blue:#1d4ed8;--dark:#0f2d6b;--green:#16a34a;--red:#dc2626;
+  --bg1:#e8f4ff;--bg2:#fff5df;--card:#fff;--line:#dbeafe;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{
+  margin:0; min-height:100svh; font-family:"Noto Sans Thai","Prompt","Sarabun",Tahoma,sans-serif;
+  color:#172033; background:linear-gradient(135deg,var(--bg1),var(--bg2)); overflow-x:hidden;
+}
+.app{width:min(1120px,100%); margin:auto; padding:max(10px,env(safe-area-inset-top)) max(10px,env(safe-area-inset-right)) max(14px,env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left))}
+.hero{
+  background:rgba(255,255,255,.94); border-radius:28px; padding:clamp(14px,3vw,24px);
+  box-shadow:0 16px 42px #0f172a22; position:relative; overflow:hidden;
+}
+.hero:after{content:"🧲";position:absolute;right:18px;top:10px;font-size:clamp(44px,9vw,82px);opacity:.18}
+h1{margin:0;color:var(--dark);font-size:clamp(30px,7vw,64px);line-height:1.05;padding-right:70px}
+.sub{font-size:clamp(15px,3vw,24px);font-weight:800;margin-top:8px}
+.formula{display:inline-block;margin-top:10px;padding:8px 14px;border-radius:999px;background:#eff6ff;border:2px solid #bfdbfe;font-weight:900;color:var(--dark)}
+.toolbar{display:grid;grid-template-columns:1fr auto auto;gap:10px;margin:14px 0;align-items:center}
+.score{display:flex;gap:8px;flex-wrap:wrap;background:#fff;border-radius:18px;padding:10px;box-shadow:0 10px 24px #0f172a14}
+.pill{background:#f1f5f9;border-radius:999px;padding:7px 10px;font-weight:900;font-size:clamp(14px,2.7vw,16px)}
+button{font-family:inherit;border:0;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.btn{min-height:54px;border-radius:16px;padding:10px 16px;font-size:clamp(15px,3vw,17px);font-weight:900}
+.btn-primary{background:var(--blue);color:#fff}.btn-soft{background:#fff;color:var(--dark);border:2px solid #bfdbfe}
+button:disabled{opacity:.45;cursor:not-allowed}
+.game{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(290px,.85fr);gap:14px}
+.card,.panel,.end{
+  background:rgba(255,255,255,.96);border-radius:26px;padding:clamp(16px,3vw,24px);
+  box-shadow:0 16px 40px #0f172a20;border:2px solid #ffffffaa;
+}
+.card{min-height:430px;display:flex;flex-direction:column}
+.top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.badge{background:var(--dark);color:#fff;border-radius:16px;padding:8px 13px;font-size:clamp(18px,4vw,22px);font-weight:1000}
+.tag{background:#fef3c7;color:#92400e;border-radius:999px;padding:8px 12px;font-weight:1000}
+.question{margin:clamp(16px,4vw,28px) 0 14px;font-size:clamp(25px,6.3vw,44px);font-weight:1000;line-height:1.22;color:#0f172a}
+.visual{display:flex;align-items:center;gap:12px;padding:12px;border:2px dashed #cbd5e1;border-radius:20px;background:linear-gradient(135deg,#f8fafc,#eef6ff);min-height:100px;margin-bottom:14px}
+.icon{width:clamp(58px,13vw,78px);height:clamp(58px,13vw,78px);border-radius:22px;background:#fff;display:grid;place-items:center;font-size:clamp(34px,8vw,46px);box-shadow:inset 0 0 0 2px #e2e8f0;flex:0 0 auto}
+.visualText{font-size:clamp(16px,3.7vw,20px);line-height:1.45;font-weight:850;color:#334155}
+.answers{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:auto}
+.choice{min-height:clamp(68px,14vw,92px);border-radius:22px;padding:12px;font-size:clamp(20px,4.7vw,25px);font-weight:1000;border:3px solid transparent}
+.zero{background:#fff1f2;color:#991b1b;border-color:#fecdd3}.nonzero{background:#ecfdf5;color:#166534;border-color:#bbf7d0}
+.correct{background:#dcfce7!important;border-color:var(--green)!important;color:#14532d!important;outline:5px solid #16a34a33}
+.wrong{background:#fee2e2!important;border-color:var(--red)!important;color:#7f1d1d!important;outline:5px solid #dc262633}
+.feedback{display:none;margin-top:14px;border-radius:20px;padding:14px;font-size:clamp(16px,3.4vw,19px);line-height:1.55;font-weight:850}
+.show{display:block}.good{background:#dcfce7;color:#14532d;border:2px solid #86efac}.bad{background:#fee2e2;color:#7f1d1d;border:2px solid #fca5a5}
+.side{display:flex;flex-direction:column;gap:14px}.panel h2,summary{margin:0 0 8px;color:var(--dark);font-size:clamp(20px,4vw,24px);font-weight:1000}
+summary{cursor:pointer;list-style:none}summary::-webkit-details-marker{display:none}
+ul{margin:8px 0 0;padding-left:22px;font-size:clamp(15px,3.2vw,17px);line-height:1.65;font-weight:800}
+.hint{font-size:clamp(14px,3vw,16px);line-height:1.55;font-weight:800;color:#64748b}
+.progress{height:16px;background:#e2e8f0;border-radius:999px;overflow:hidden}.bar{height:100%;width:0;background:linear-gradient(90deg,#06b6d4,var(--blue));border-radius:999px;transition:.25s}
+.end{display:none;text-align:center;margin-top:14px}.end.show{display:block}.end h2{font-size:clamp(28px,6vw,46px);margin:0;color:var(--dark)}
+.big{font-size:clamp(56px,18vw,98px);font-weight:1000;color:var(--dark);line-height:1;margin:10px 0}
+.review{text-align:left;display:grid;gap:10px;margin-top:16px}.item{border-left:7px solid #cbd5e1;background:#f8fafc;border-radius:15px;padding:12px;font-weight:750;line-height:1.45}.ok{border-left-color:var(--green)}.no{border-left-color:var(--red)}
+.hidden{display:none!important}
+@media(max-width:760px) and (orientation:portrait){
+ .app{padding:10px}.toolbar{grid-template-columns:1fr;position:sticky;top:0;z-index:20;background:#e8f4ffee;border-radius:18px;padding:8px 0;backdrop-filter:blur(8px)}
+ .score{justify-content:center}.toolbar .btn{width:100%}.game{grid-template-columns:1fr}.answers{grid-template-columns:1fr}.card{min-height:calc(100svh - 250px)}
+}
+@media(max-height:520px) and (orientation:landscape){
+ .app{padding:8px}.hero{padding:9px 14px;border-radius:18px}h1{font-size:28px}.sub{font-size:14px}.formula{font-size:13px;padding:5px 10px;margin-top:5px}
+ .toolbar{grid-template-columns:1fr auto auto;margin:8px 0}.pill{font-size:12px;padding:5px 8px}.btn{min-height:42px;font-size:13px;padding:6px 10px}
+ .game{grid-template-columns:1fr 320px;gap:8px}.card{max-height:calc(100svh - 128px);overflow:auto;min-height:auto;padding:12px;border-radius:18px}
+ .badge{font-size:15px;padding:6px 10px}.tag{font-size:12px;padding:5px 8px}.question{font-size:24px;margin:10px 0}.visual{min-height:72px;padding:8px}.icon{width:52px;height:52px;font-size:30px}.visualText{font-size:14px}
+ .choice{min-height:54px;font-size:18px}.feedback{font-size:14px;padding:10px;margin-top:8px}.side{max-height:calc(100svh - 128px);overflow:auto;gap:8px}.panel{padding:10px;border-radius:18px}ul,.hint{font-size:12px}
+}
+@media(min-width:761px) and (max-width:1024px) and (orientation:portrait){
+ .game{grid-template-columns:1fr}.side{display:grid;grid-template-columns:1fr 1fr}.side details{grid-column:1/-1}.card{min-height:520px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<section class="hero">
+<h1>เกมแรงเป็นศูนย์หรือไม่</h1>
+<div class="sub">ฝึกวิเคราะห์แรงแม่เหล็กที่กระทำต่ออนุภาคมีประจุไฟฟ้า</div>
+<div class="formula">หลักคิด: F = |q|vB sinθ</div>
+</section>
+
+<div class="toolbar">
+ <div class="score">
+  <span class="pill">📌 ข้อที่ <span id="current">1</span>/<span id="total">15</span></span>
+  <span class="pill">⭐ คะแนน <span id="score">0</span></span>
+  <span class="pill">✅ ถูก <span id="correct">0</span></span>
+ </div>
+ <button class="btn btn-soft" onclick="restart()">เริ่มใหม่</button>
+ <button class="btn btn-primary" id="nextBtn" onclick="next()" disabled>ข้อต่อไป</button>
+</div>
+
+<main class="game" id="game">
+<section class="card">
+ <div class="top"><div class="badge" id="cardNo">บัตรที่ 1</div><div class="tag">เลือกคำตอบ</div></div>
+ <div class="question" id="q"></div>
+ <div class="visual"><div class="icon" id="icon">🧲</div><div class="visualText" id="visual"></div></div>
+ <div class="answers">
+  <button class="choice zero" id="zeroBtn" onclick="answer('zero')">⭕ แรงเป็นศูนย์</button>
+  <button class="choice nonzero" id="nonzeroBtn" onclick="answer('nonzero')">⚡ แรงไม่เป็นศูนย์</button>
+ </div>
+ <div class="feedback" id="feedback"></div>
+</section>
+<aside class="side">
+ <details class="panel" open><summary>กฎจำง่าย</summary>
+  <ul>
+   <li>ไม่มีประจุไฟฟ้า q = 0 → แรงเป็นศูนย์</li>
+   <li>ไม่เคลื่อนที่ v = 0 → แรงเป็นศูนย์</li>
+   <li>ไม่มีสนามแม่เหล็ก B = 0 → แรงเป็นศูนย์</li>
+   <li>v ขนานกับ B → แรงเป็นศูนย์</li>
+   <li>v ตั้งฉากกับ B → แรงมากที่สุด</li>
+  </ul>
+ </details>
+ <section class="panel"><h2>ความคืบหน้า</h2><div class="progress"><div class="bar" id="bar"></div></div><div class="hint">ตอบให้ครบ 15 บัตร แล้วดูผลคะแนนท้ายเกม</div></section>
+ <section class="panel"><h2>โจทย์คิดเร็ว</h2><div class="hint">ก่อนตอบให้เช็ก 4 อย่าง: q, v, B และมุม θ</div></section>
+</aside>
+</main>
+
+<section class="end" id="end">
+ <h2>จบเกมแล้ว!</h2>
+ <div class="big"><span id="final">0</span>/15</div>
+ <p id="message"></p>
+ <button class="btn btn-primary" onclick="restart()">เล่นอีกครั้ง</button>
+ <div class="review" id="review"></div>
+</section>
+</div>
+
+<script>
+const questions=[
+{text:"โปรตอนอยู่นิ่งในสนามแม่เหล็ก",answer:"zero",icon:"➕",visual:"มีประจุไฟฟ้า แต่ไม่เคลื่อนที่ จึงมี v = 0",reason:"แรงเป็นศูนย์ เพราะแม้โปรตอนมีประจุบวก แต่อนุภาคอยู่นิ่ง ทำให้ v = 0"},
+{text:"อิเล็กตรอนเคลื่อนที่ขนานกับสนามแม่เหล็ก",answer:"zero",icon:"➖",visual:"v ขนานกับ B ทำให้มุม θ = 0°",reason:"แรงเป็นศูนย์ เพราะเคลื่อนที่ขนานกับสนามแม่เหล็ก ทำให้ sin0° = 0"},
+{text:"โปรตอนเคลื่อนที่ตั้งฉากกับสนามแม่เหล็ก",answer:"nonzero",icon:"⚡",visual:"v ตั้งฉากกับ B ทำให้มุม θ = 90°",reason:"แรงไม่เป็นศูนย์ เพราะมีประจุ เคลื่อนที่ และตั้งฉากกับสนามแม่เหล็ก แรงมีค่ามากที่สุด"},
+{text:"อิเล็กตรอนเคลื่อนที่ทำมุม 30° กับสนามแม่เหล็ก",answer:"nonzero",icon:"📐",visual:"มุม θ = 30° ไม่ใช่ 0° หรือ 180°",reason:"แรงไม่เป็นศูนย์ เพราะ sin30° ไม่เท่ากับศูนย์"},
+{text:"นิวตรอนเคลื่อนที่ผ่านสนามแม่เหล็ก",answer:"zero",icon:"⚪",visual:"นิวตรอนไม่มีประจุไฟฟ้าสุทธิ",reason:"แรงเป็นศูนย์ เพราะนิวตรอนไม่มีประจุไฟฟ้าสุทธิ ทำให้ q = 0"},
+{text:"อนุภาคแอลฟาเคลื่อนที่ตั้งฉากกับสนามแม่เหล็ก",answer:"nonzero",icon:"☢️",visual:"อนุภาคแอลฟามีประจุบวกและ v ตั้งฉากกับ B",reason:"แรงไม่เป็นศูนย์ เพราะมีประจุบวกและเคลื่อนที่ตั้งฉากกับสนามแม่เหล็ก"},
+{text:"อิเล็กตรอนเคลื่อนที่สวนทิศกับสนามแม่เหล็ก",answer:"zero",icon:"↔️",visual:"v สวนทิศกับ B คือ θ = 180°",reason:"แรงเป็นศูนย์ เพราะเคลื่อนที่ขนานแต่สวนทิศกับสนามแม่เหล็ก ทำให้ sin180° = 0"},
+{text:"โปรตอนเคลื่อนที่ผ่านบริเวณที่ไม่มีสนามแม่เหล็ก",answer:"zero",icon:"🚫",visual:"ไม่มีสนามแม่เหล็กในบริเวณนั้น",reason:"แรงเป็นศูนย์ เพราะไม่มีสนามแม่เหล็ก ทำให้ B = 0"},
+{text:"อิเล็กตรอนเคลื่อนที่ตั้งฉากกับสนามแม่เหล็ก",answer:"nonzero",icon:"➖",visual:"อิเล็กตรอนมีประจุลบ และ v ตั้งฉากกับ B",reason:"แรงไม่เป็นศูนย์ เพราะอิเล็กตรอนมีประจุและเคลื่อนที่ตั้งฉากกับสนามแม่เหล็ก"},
+{text:"อนุภาคมีประจุบวกเคลื่อนที่ทำมุม 90° กับสนามแม่เหล็ก",answer:"nonzero",icon:"📐",visual:"มุม θ = 90° ทำให้ sin90° = 1",reason:"แรงไม่เป็นศูนย์ เพราะ sin90° = 1 แรงแม่เหล็กมีค่ามากที่สุด"},
+{text:"อนุภาคมีประจุบวกเคลื่อนที่ทำมุม 0° กับสนามแม่เหล็ก",answer:"zero",icon:"➡️",visual:"มุม θ = 0° คือเคลื่อนที่ขนานกับ B",reason:"แรงเป็นศูนย์ เพราะ sin0° = 0"},
+{text:"อนุภาคมีประจุลบเคลื่อนที่ทำมุม 60° กับสนามแม่เหล็ก",answer:"nonzero",icon:"📐",visual:"มีประจุ เคลื่อนที่ และมุมไม่ใช่ 0° หรือ 180°",reason:"แรงไม่เป็นศูนย์ เพราะมีประจุ เคลื่อนที่ และไม่ขนานกับสนามแม่เหล็ก"},
+{text:"ฝุ่นละอองไม่มีประจุไฟฟ้าเคลื่อนที่ผ่านสนามแม่เหล็ก",answer:"zero",icon:"🌫️",visual:"ไม่มีประจุไฟฟ้า",reason:"แรงเป็นศูนย์ เพราะไม่มีประจุไฟฟ้า ทำให้ q = 0"},
+{text:"ไอออนบวกเคลื่อนที่ผ่านสนามแม่เหล็กโดยทำมุม 45°",answer:"nonzero",icon:"➕",visual:"ไอออนมีประจุ และทำมุมกับ B",reason:"แรงไม่เป็นศูนย์ เพราะไอออนมีประจุและเคลื่อนที่ทำมุมกับสนามแม่เหล็ก"},
+{text:"อิเล็กตรอนเคลื่อนที่ในทิศเดียวกับสนามแม่เหล็ก",answer:"zero",icon:"➡️",visual:"v ไปทิศเดียวกับ B คือ θ = 0°",reason:"แรงเป็นศูนย์ เพราะเคลื่อนที่ในทิศเดียวกับสนามแม่เหล็ก หรือ v ขนานกับ B"}
+];
+let i=0,score=0,correct=0,answered=false,review=[];
+const $=id=>document.getElementById(id);
+$("total").textContent=questions.length;
+function render(){
+ const x=questions[i];
+ $("q").textContent=x.text;$("current").textContent=i+1;$("cardNo").textContent="บัตรที่ "+(i+1);
+ $("icon").textContent=x.icon;$("visual").textContent=x.visual;$("feedback").className="feedback";$("feedback").innerHTML="";
+ ["zeroBtn","nonzeroBtn"].forEach(id=>{$(id).classList.remove("correct","wrong");$(id).disabled=false});
+ $("nextBtn").disabled=true;answered=false;$("bar").style.width=(i/questions.length*100)+"%";
+}
+function answer(choice){
+ if(answered)return;answered=true;const x=questions[i];const ok=choice===x.answer;
+ if(ok){score++;correct++;$("feedback").className="feedback show good";$("feedback").innerHTML="✅ ถูกต้อง!<br>"+x.reason}
+ else{$("feedback").className="feedback show bad";$("feedback").innerHTML="❌ ยังไม่ถูก<br>คำตอบที่ถูกคือ <b>"+(x.answer==="zero"?"แรงเป็นศูนย์":"แรงไม่เป็นศูนย์")+"</b><br>"+x.reason}
+ $(x.answer==="zero"?"zeroBtn":"nonzeroBtn").classList.add("correct");
+ if(!ok)$(choice==="zero"?"zeroBtn":"nonzeroBtn").classList.add("wrong");
+ $("zeroBtn").disabled=true;$("nonzeroBtn").disabled=true;$("nextBtn").disabled=false;
+ $("score").textContent=score;$("correct").textContent=correct;$("nextBtn").textContent=i===questions.length-1?"ดูผลคะแนน":"ข้อต่อไป";
+ review[i]={text:x.text,ok,answer:x.answer,reason:x.reason};
+}
+function next(){if(i<questions.length-1){i++;render()}else showEnd()}
+function showEnd(){
+ $("game").classList.add("hidden");document.querySelector(".toolbar").classList.add("hidden");$("end").classList.add("show");$("final").textContent=score;
+ $("message").textContent=score>=13?"ยอดเยี่ยมมาก! วิเคราะห์ q, v, B และ θ ได้แม่นยำ":score>=10?"ดีมาก! เข้าใจหลักแรงแม่เหล็กแล้ว":score>=7?"พอใช้ได้ ลองจำเงื่อนไขแรงเป็นศูนย์ให้แม่นขึ้น":"ควรทบทวนหลัก F = |q|vBsinθ อีกครั้ง";
+ $("review").innerHTML="";review.forEach((r,n)=>{let d=document.createElement("div");d.className="item "+(r.ok?"ok":"no");d.innerHTML=`<b>ข้อ ${n+1}:</b> ${r.text}<br><b>เฉลย:</b> ${r.answer==="zero"?"แรงเป็นศูนย์":"แรงไม่เป็นศูนย์"}<br>${r.reason}`;$("review").appendChild(d)});
+ scrollTo({top:0,behavior:"smooth"});
+}
+function restart(){
+ i=0;score=0;correct=0;answered=false;review=[];$("score").textContent=0;$("correct").textContent=0;$("nextBtn").textContent="ข้อต่อไป";
+ $("game").classList.remove("hidden");document.querySelector(".toolbar").classList.remove("hidden");$("end").classList.remove("show");render();scrollTo({top:0,behavior:"smooth"});
+}
+render();
+</script>
+</body>
+</html>
