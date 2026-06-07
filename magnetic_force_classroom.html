@@ -1,0 +1,477 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>เกมแรงเป็นศูนย์หรือไม่ — ห้องเรียน</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Prompt:wght@400;700;900&family=Sarabun:wght@400;700&display=swap');
+:root{
+  --blue:#1d4ed8;--dark:#0f2d6b;--green:#16a34a;--red:#dc2626;--yellow:#f59e0b;
+  --bg1:#e8f4ff;--bg2:#fff5df;--card:#fff;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{min-height:100svh;font-family:"Prompt","Sarabun",Tahoma,sans-serif;color:#172033;background:linear-gradient(135deg,var(--bg1),var(--bg2));overflow-x:hidden}
+button{font-family:inherit;border:0;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+
+/* ===== SCREENS ===== */
+.screen{display:none;min-height:100svh}
+.screen.active{display:flex;flex-direction:column}
+
+/* ===== LOGIN SCREEN ===== */
+#loginScreen{align-items:center;justify-content:center;padding:20px}
+.login-box{background:#fff;border-radius:28px;padding:clamp(24px,5vw,48px);box-shadow:0 20px 60px #0f172a28;width:min(480px,100%);text-align:center;position:relative;overflow:hidden}
+.login-box::before{content:"🧲";position:absolute;right:20px;top:10px;font-size:80px;opacity:.1}
+.login-title{font-size:clamp(28px,6vw,44px);font-weight:900;color:var(--dark);line-height:1.1;margin-bottom:8px}
+.login-sub{color:#64748b;font-size:clamp(15px,3vw,18px);font-weight:700;margin-bottom:28px}
+.name-input{width:100%;border:3px solid #bfdbfe;border-radius:16px;padding:16px 20px;font-size:clamp(18px,4vw,22px);font-family:inherit;font-weight:700;color:var(--dark);outline:none;transition:.2s;margin-bottom:16px;text-align:center}
+.name-input:focus{border-color:var(--blue);box-shadow:0 0 0 4px #3b82f622}
+.class-select{width:100%;border:3px solid #bfdbfe;border-radius:16px;padding:14px 20px;font-size:clamp(16px,3.5vw,19px);font-family:inherit;font-weight:700;color:var(--dark);outline:none;background:#fff;margin-bottom:20px;cursor:pointer}
+.class-select:focus{border-color:var(--blue)}
+.btn-start{width:100%;min-height:58px;border-radius:18px;background:var(--blue);color:#fff;font-size:clamp(18px,4vw,22px);font-weight:900;letter-spacing:.5px;transition:.2s}
+.btn-start:hover{background:#1e40af;transform:translateY(-1px)}
+.btn-start:disabled{opacity:.4;transform:none;cursor:not-allowed}
+.or-divider{display:flex;align-items:center;gap:12px;margin:20px 0;color:#94a3b8;font-size:14px}
+.or-divider::before,.or-divider::after{content:"";flex:1;height:1px;background:#e2e8f0}
+.btn-teacher{width:100%;min-height:48px;border-radius:16px;background:#f1f5f9;color:#475569;font-size:15px;font-weight:700;border:2px solid #e2e8f0;transition:.2s}
+.btn-teacher:hover{background:#e2e8f0}
+
+/* ===== GAME SCREEN ===== */
+#gameScreen{padding:max(10px,env(safe-area-inset-top)) max(10px,env(safe-area-inset-right)) max(14px,env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left))}
+.app{width:min(1120px,100%);margin:auto}
+.hero{background:rgba(255,255,255,.94);border-radius:28px;padding:clamp(14px,3vw,24px);box-shadow:0 16px 42px #0f172a22;position:relative;overflow:hidden;margin-bottom:14px}
+.hero:after{content:"🧲";position:absolute;right:18px;top:10px;font-size:clamp(44px,9vw,82px);opacity:.18}
+.hero-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.player-badge{background:var(--dark);color:#fff;border-radius:12px;padding:8px 14px;font-weight:900;font-size:clamp(14px,3vw,17px);white-space:nowrap}
+h1{color:var(--dark);font-size:clamp(24px,5.5vw,52px);line-height:1.05;padding-right:70px}
+.sub{font-size:clamp(14px,2.5vw,20px);font-weight:800;margin-top:4px}
+.formula{display:inline-block;margin-top:8px;padding:7px 14px;border-radius:999px;background:#eff6ff;border:2px solid #bfdbfe;font-weight:900;color:var(--dark)}
+.toolbar{display:grid;grid-template-columns:1fr auto auto;gap:10px;margin:14px 0;align-items:center}
+.score{display:flex;gap:8px;flex-wrap:wrap;background:#fff;border-radius:18px;padding:10px;box-shadow:0 10px 24px #0f172a14}
+.pill{background:#f1f5f9;border-radius:999px;padding:7px 10px;font-weight:900;font-size:clamp(14px,2.7vw,16px)}
+.btn{min-height:54px;border-radius:16px;padding:10px 16px;font-size:clamp(15px,3vw,17px);font-weight:900}
+.btn-primary{background:var(--blue);color:#fff}.btn-soft{background:#fff;color:var(--dark);border:2px solid #bfdbfe}
+button:disabled{opacity:.45;cursor:not-allowed}
+.game{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(290px,.85fr);gap:14px}
+.card,.panel,.end{background:rgba(255,255,255,.96);border-radius:26px;padding:clamp(16px,3vw,24px);box-shadow:0 16px 40px #0f172a20;border:2px solid #ffffffaa}
+.card{min-height:430px;display:flex;flex-direction:column}
+.top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.badge{background:var(--dark);color:#fff;border-radius:16px;padding:8px 13px;font-size:clamp(18px,4vw,22px);font-weight:1000}
+.tag{background:#fef3c7;color:#92400e;border-radius:999px;padding:8px 12px;font-weight:1000}
+.question{margin:clamp(16px,4vw,28px) 0 14px;font-size:clamp(25px,6.3vw,44px);font-weight:1000;line-height:1.22;color:#0f172a}
+.visual{display:flex;align-items:center;gap:12px;padding:12px;border:2px dashed #cbd5e1;border-radius:20px;background:linear-gradient(135deg,#f8fafc,#eef6ff);min-height:100px;margin-bottom:14px}
+.icon{width:clamp(58px,13vw,78px);height:clamp(58px,13vw,78px);border-radius:22px;background:#fff;display:grid;place-items:center;font-size:clamp(34px,8vw,46px);box-shadow:inset 0 0 0 2px #e2e8f0;flex:0 0 auto}
+.visualText{font-size:clamp(16px,3.7vw,20px);line-height:1.45;font-weight:850;color:#334155}
+.answers{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:auto}
+.choice{min-height:clamp(68px,14vw,92px);border-radius:22px;padding:12px;font-size:clamp(20px,4.7vw,25px);font-weight:1000;border:3px solid transparent}
+.zero{background:#fff1f2;color:#991b1b;border-color:#fecdd3}.nonzero{background:#ecfdf5;color:#166534;border-color:#bbf7d0}
+.correct{background:#dcfce7!important;border-color:var(--green)!important;color:#14532d!important;outline:5px solid #16a34a33}
+.wrong{background:#fee2e2!important;border-color:var(--red)!important;color:#7f1d1d!important;outline:5px solid #dc262633}
+.feedback{display:none;margin-top:14px;border-radius:20px;padding:14px;font-size:clamp(16px,3.4vw,19px);line-height:1.55;font-weight:850}
+.show{display:block}.good{background:#dcfce7;color:#14532d;border:2px solid #86efac}.bad{background:#fee2e2;color:#7f1d1d;border:2px solid #fca5a5}
+.side{display:flex;flex-direction:column;gap:14px}.panel h2,summary{margin:0 0 8px;color:var(--dark);font-size:clamp(20px,4vw,24px);font-weight:1000}
+summary{cursor:pointer;list-style:none}summary::-webkit-details-marker{display:none}
+ul{margin:8px 0 0;padding-left:22px;font-size:clamp(15px,3.2vw,17px);line-height:1.65;font-weight:800}
+.hint{font-size:clamp(14px,3vw,16px);line-height:1.55;font-weight:800;color:#64748b}
+.progress{height:16px;background:#e2e8f0;border-radius:999px;overflow:hidden}.bar{height:100%;width:0;background:linear-gradient(90deg,#06b6d4,var(--blue));border-radius:999px;transition:.25s}
+.end{display:none;text-align:center;margin-top:14px}.end.show{display:block}.end h2{font-size:clamp(28px,6vw,46px);margin:0;color:var(--dark)}
+.big{font-size:clamp(56px,18vw,98px);font-weight:1000;color:var(--dark);line-height:1;margin:10px 0}
+.review{text-align:left;display:grid;gap:10px;margin-top:16px}.item{border-left:7px solid #cbd5e1;background:#f8fafc;border-radius:15px;padding:12px;font-weight:750;line-height:1.45}.ok{border-left-color:var(--green)}.no{border-left-color:var(--red)}
+.hidden{display:none!important}
+.submit-score-box{background:linear-gradient(135deg,#eff6ff,#ecfdf5);border:2px solid #bfdbfe;border-radius:20px;padding:20px;margin-top:16px;text-align:center}
+.submit-score-box h3{color:var(--dark);font-size:22px;margin-bottom:8px}
+.btn-submit{min-height:52px;width:100%;border-radius:16px;background:var(--green);color:#fff;font-size:18px;font-weight:900;margin-top:10px;transition:.2s}
+.btn-submit:hover{background:#15803d}
+.btn-submit:disabled{background:#86efac;cursor:not-allowed}
+.submit-status{font-size:15px;color:#64748b;margin-top:8px;min-height:22px;font-weight:700}
+
+/* ===== LEADERBOARD SCREEN ===== */
+#lbScreen{padding:20px}
+.lb-wrap{width:min(860px,100%);margin:auto}
+.lb-header{background:var(--dark);color:#fff;border-radius:28px;padding:clamp(20px,4vw,36px);text-align:center;margin-bottom:20px;position:relative;overflow:hidden}
+.lb-header::before{content:"🏆";position:absolute;left:20px;top:10px;font-size:70px;opacity:.15}
+.lb-header::after{content:"🧲";position:absolute;right:20px;top:10px;font-size:70px;opacity:.15}
+.lb-title{font-size:clamp(26px,5vw,44px);font-weight:900;margin-bottom:4px}
+.lb-sub{font-size:clamp(15px,3vw,20px);opacity:.8;font-weight:700}
+.lb-controls{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
+.lb-filter{border:2px solid #bfdbfe;border-radius:12px;padding:10px 14px;font-size:15px;font-family:inherit;font-weight:700;color:var(--dark);outline:none;background:#fff;cursor:pointer;flex:1;min-width:140px}
+.lb-filter:focus{border-color:var(--blue)}
+.btn-refresh{min-height:46px;border-radius:12px;background:var(--blue);color:#fff;font-size:15px;font-weight:900;padding:0 18px;flex-shrink:0}
+.btn-refresh:hover{background:#1e40af}
+.btn-reset-lb{min-height:46px;border-radius:12px;background:#fff;color:#dc2626;font-size:15px;font-weight:900;padding:0 18px;border:2px solid #fecdd3;flex-shrink:0}
+.btn-reset-lb:hover{background:#fee2e2}
+.auto-badge{background:#ecfdf5;color:#166534;border-radius:999px;padding:6px 12px;font-size:13px;font-weight:700;margin-left:auto}
+.lb-table-wrap{background:#fff;border-radius:24px;box-shadow:0 12px 36px #0f172a1a;overflow:hidden}
+.lb-table{width:100%;border-collapse:collapse}
+.lb-table th{background:var(--dark);color:#fff;padding:14px 16px;text-align:left;font-size:16px;font-weight:900}
+.lb-table th:last-child,.lb-table td:last-child{text-align:center}
+.lb-table td{padding:13px 16px;font-size:15px;font-weight:800;border-bottom:1px solid #f1f5f9;vertical-align:middle}
+.lb-table tr:last-child td{border-bottom:none}
+.lb-table tr:hover td{background:#f8fafc}
+.rank-1 td{background:linear-gradient(90deg,#fffbeb,#fff)!important}
+.rank-2 td{background:linear-gradient(90deg,#f8fafc,#fff)!important}
+.rank-3 td{background:linear-gradient(90deg,#fff7ed,#fff)!important}
+.rank-medal{font-size:22px;display:inline-block;width:32px;text-align:center}
+.score-bar-wrap{display:flex;align-items:center;gap:10px}
+.score-bar{height:10px;border-radius:999px;background:linear-gradient(90deg,#06b6d4,var(--blue));flex-shrink:0;transition:.3s}
+.lb-empty{text-align:center;padding:48px 20px;color:#94a3b8;font-size:20px;font-weight:700}
+.lb-last-update{text-align:center;font-size:13px;color:#94a3b8;margin-top:12px;font-weight:700}
+.back-btn{background:#fff;border:2px solid #bfdbfe;color:var(--dark);border-radius:14px;padding:10px 18px;font-size:15px;font-weight:900;margin-bottom:16px;display:inline-flex;align-items:center;gap:6px}
+.back-btn:hover{background:#eff6ff}
+.class-tag{display:inline-block;background:#eff6ff;color:var(--blue);border-radius:8px;padding:3px 10px;font-size:13px;font-weight:900;margin-left:6px}
+.attempt-tag{display:inline-block;background:#f1f5f9;color:#475569;border-radius:8px;padding:2px 8px;font-size:12px;font-weight:700;margin-left:4px}
+/* Password modal */
+.modal-overlay{position:fixed;inset:0;background:#0f172a88;display:flex;align-items:center;justify-content:center;z-index:100;backdrop-filter:blur(4px)}
+.modal-box{background:#fff;border-radius:24px;padding:32px;width:min(360px,90%);text-align:center;box-shadow:0 24px 64px #0f172a44}
+.modal-box h3{color:var(--dark);font-size:24px;font-weight:900;margin-bottom:8px}
+.modal-box p{color:#64748b;font-size:15px;margin-bottom:20px;font-weight:700}
+.modal-input{width:100%;border:3px solid #bfdbfe;border-radius:14px;padding:14px;font-size:18px;font-family:inherit;font-weight:700;text-align:center;outline:none;margin-bottom:12px}
+.modal-input:focus{border-color:var(--blue)}
+.modal-error{color:var(--red);font-size:14px;font-weight:700;margin-bottom:10px;min-height:20px}
+.btn-modal{width:100%;min-height:50px;border-radius:14px;background:var(--blue);color:#fff;font-size:17px;font-weight:900}
+.btn-modal-cancel{width:100%;min-height:44px;border-radius:14px;background:#f1f5f9;color:#475569;font-size:15px;font-weight:700;margin-top:8px}
+
+@media(max-width:760px) and (orientation:portrait){
+ .toolbar{grid-template-columns:1fr;position:sticky;top:0;z-index:20;background:#e8f4ffee;border-radius:18px;padding:8px 0;backdrop-filter:blur(8px)}
+ .score{justify-content:center}.toolbar .btn{width:100%}.game{grid-template-columns:1fr}.answers{grid-template-columns:1fr}.card{min-height:calc(100svh - 250px)}
+ .lb-controls{flex-direction:column}.lb-filter,.btn-refresh,.btn-reset-lb{width:100%}.auto-badge{margin-left:0}
+}
+@media(max-height:520px) and (orientation:landscape){
+ .app{padding:8px}.hero{padding:9px 14px;border-radius:18px}h1{font-size:28px}.sub{font-size:14px}
+ .toolbar{grid-template-columns:1fr auto auto;margin:8px 0}.pill{font-size:12px;padding:5px 8px}.btn{min-height:42px;font-size:13px;padding:6px 10px}
+ .game{grid-template-columns:1fr 320px;gap:8px}.card{max-height:calc(100svh - 128px);overflow:auto;min-height:auto;padding:12px;border-radius:18px}
+}
+</style>
+</head>
+<body>
+
+<!-- ===== LOGIN SCREEN ===== -->
+<div class="screen active" id="loginScreen">
+  <div class="login-box">
+    <div class="login-title">เกมแรงเป็นศูนย์<br>หรือไม่</div>
+    <div class="login-sub">ฝึกวิเคราะห์แรงแม่เหล็ก | ห้องเรียน ม.6</div>
+    <input class="name-input" id="nameInput" type="text" placeholder="พิมพ์ชื่อ-นามสกุลของคุณ" maxlength="40" autocomplete="off" autocapitalize="words">
+    <select class="class-select" id="classSelect">
+      <option value="">-- เลือกห้องเรียน --</option>
+      <option value="6/SM">ม.6/SM</option>
+      <option value="6/2">ม.6/2</option>
+      <option value="6/4">ม.6/4</option>
+    </select>
+    <button class="btn-start" id="startBtn" disabled onclick="startGame()">🚀 เริ่มเกม</button>
+    <div class="or-divider">หรือ</div>
+    <button class="btn-teacher" onclick="openTeacherModal()">👩‍🏫 เปิดหน้า Leaderboard (ครู)</button>
+  </div>
+</div>
+
+<!-- ===== TEACHER PASSWORD MODAL ===== -->
+<div class="modal-overlay" id="teacherModal" style="display:none">
+  <div class="modal-box">
+    <h3>🔐 ล็อกอินครู</h3>
+    <p>กรอกรหัสผ่านสำหรับครูเพื่อเปิด Leaderboard</p>
+    <input class="modal-input" id="pwInput" type="password" placeholder="รหัสผ่าน" autocomplete="off">
+    <div class="modal-error" id="pwError"></div>
+    <button class="btn-modal" onclick="checkTeacherPw()">เข้าสู่ระบบ</button>
+    <button class="btn-modal-cancel" onclick="closeTeacherModal()">ยกเลิก</button>
+  </div>
+</div>
+
+<!-- ===== GAME SCREEN ===== -->
+<div class="screen" id="gameScreen">
+<div class="app">
+<section class="hero">
+  <div class="hero-row">
+    <div class="player-badge" id="playerBadge">👤 ชื่อผู้เล่น</div>
+    <div>
+      <h1>เกมแรงเป็นศูนย์หรือไม่</h1>
+      <div class="sub">ฝึกวิเคราะห์แรงแม่เหล็กที่กระทำต่ออนุภาคมีประจุไฟฟ้า</div>
+      <div class="formula">หลักคิด: F = |q|vB sinθ</div>
+    </div>
+  </div>
+</section>
+
+<div class="toolbar">
+ <div class="score">
+  <span class="pill">📌 ข้อที่ <span id="current">1</span>/<span id="total">15</span></span>
+  <span class="pill">⭐ คะแนน <span id="score">0</span></span>
+  <span class="pill">✅ ถูก <span id="correct">0</span></span>
+ </div>
+ <button class="btn btn-soft" onclick="confirmRestart()">เริ่มใหม่</button>
+ <button class="btn btn-primary" id="nextBtn" onclick="next()" disabled>ข้อต่อไป</button>
+</div>
+
+<main class="game" id="game">
+<section class="card">
+ <div class="top"><div class="badge" id="cardNo">บัตรที่ 1</div><div class="tag">เลือกคำตอบ</div></div>
+ <div class="question" id="q"></div>
+ <div class="visual"><div class="icon" id="icon">🧲</div><div class="visualText" id="visual"></div></div>
+ <div class="answers">
+  <button class="choice zero" id="zeroBtn" onclick="answer('zero')">⭕ แรงเป็นศูนย์</button>
+  <button class="choice nonzero" id="nonzeroBtn" onclick="answer('nonzero')">⚡ แรงไม่เป็นศูนย์</button>
+ </div>
+ <div class="feedback" id="feedback"></div>
+</section>
+<aside class="side">
+ <details class="panel" open><summary>กฎจำง่าย</summary>
+  <ul>
+   <li>ไม่มีประจุไฟฟ้า q = 0 → แรงเป็นศูนย์</li>
+   <li>ไม่เคลื่อนที่ v = 0 → แรงเป็นศูนย์</li>
+   <li>ไม่มีสนามแม่เหล็ก B = 0 → แรงเป็นศูนย์</li>
+   <li>v ขนานกับ B → แรงเป็นศูนย์</li>
+   <li>v ตั้งฉากกับ B → แรงมากที่สุด</li>
+  </ul>
+ </details>
+ <section class="panel"><h2>ความคืบหน้า</h2><div class="progress"><div class="bar" id="bar"></div></div><div class="hint">ตอบให้ครบ 15 บัตร แล้วดูผลคะแนนท้ายเกม</div></section>
+ <section class="panel"><h2>โจทย์คิดเร็ว</h2><div class="hint">ก่อนตอบให้เช็ก 4 อย่าง: q, v, B และมุม θ</div></section>
+</aside>
+</main>
+
+<section class="end" id="end">
+ <h2>จบเกมแล้ว! 🎉</h2>
+ <div class="big"><span id="final">0</span>/15</div>
+ <p id="message" style="font-size:clamp(18px,4vw,24px);font-weight:800;color:#475569;margin:10px 0"></p>
+ <div class="submit-score-box">
+   <h3>📤 ส่งคะแนนเข้าห้องเรียน</h3>
+   <p id="submitInfo" style="color:#64748b;font-size:15px;font-weight:700;margin-bottom:0"></p>
+   <button class="btn-submit" id="submitBtn" onclick="submitScore()">ส่งคะแนน</button>
+   <div class="submit-status" id="submitStatus"></div>
+ </div>
+ <button class="btn btn-primary" onclick="confirmRestart()" style="margin-top:14px;min-width:200px">🔄 เล่นอีกครั้ง</button>
+ <div class="review" id="review"></div>
+</section>
+</div>
+</div>
+
+<!-- ===== LEADERBOARD SCREEN ===== -->
+<div class="screen" id="lbScreen">
+  <div class="lb-wrap">
+    <button class="back-btn" onclick="goHome()">← กลับ</button>
+    <div class="lb-header">
+      <div class="lb-title">🏆 Leaderboard</div>
+      <div class="lb-sub">เกมแรงเป็นศูนย์หรือไม่ — ฟิสิกส์ ม.6</div>
+    </div>
+    <div class="lb-controls">
+      <select class="lb-filter" id="classFilter" onchange="loadLeaderboard()">
+        <option value="">ทุกห้อง</option>
+        <option value="6/SM">ม.6/SM</option>
+        <option value="6/2">ม.6/2</option>
+        <option value="6/4">ม.6/4</option>
+      </select>
+      <button class="btn-refresh" onclick="loadLeaderboard()">🔄 รีเฟรช</button>
+      <button class="btn-reset-lb" onclick="confirmReset()">🗑 ล้างคะแนน</button>
+      <span class="auto-badge" id="autoStatus">⏱ อัปเดตอัตโนมัติ</span>
+    </div>
+    <div class="lb-table-wrap">
+      <table class="lb-table">
+        <thead><tr>
+          <th style="width:60px">อันดับ</th>
+          <th>ชื่อ</th>
+          <th style="width:80px">ห้อง</th>
+          <th style="width:180px">คะแนน (จาก 15)</th>
+          <th style="width:100px">ครั้งที่</th>
+        </tr></thead>
+        <tbody id="lbBody"><tr><td colspan="5" class="lb-empty">กำลังโหลด...</td></tr></tbody>
+      </table>
+    </div>
+    <div class="lb-last-update" id="lastUpdate"></div>
+  </div>
+</div>
+
+<script>
+// ===== STORAGE KEY =====
+const STORAGE_KEY = 'magnetic_force_scores';
+
+// ===== QUESTIONS =====
+const questions=[
+{text:"โปรตอนอยู่นิ่งในสนามแม่เหล็ก",answer:"zero",icon:"➕",visual:"มีประจุไฟฟ้า แต่ไม่เคลื่อนที่ จึงมี v = 0",reason:"แรงเป็นศูนย์ เพราะแม้โปรตอนมีประจุบวก แต่อนุภาคอยู่นิ่ง ทำให้ v = 0"},
+{text:"อิเล็กตรอนเคลื่อนที่ขนานกับสนามแม่เหล็ก",answer:"zero",icon:"➖",visual:"v ขนานกับ B ทำให้มุม θ = 0°",reason:"แรงเป็นศูนย์ เพราะเคลื่อนที่ขนานกับสนามแม่เหล็ก ทำให้ sin0° = 0"},
+{text:"โปรตอนเคลื่อนที่ตั้งฉากกับสนามแม่เหล็ก",answer:"nonzero",icon:"⚡",visual:"v ตั้งฉากกับ B ทำให้มุม θ = 90°",reason:"แรงไม่เป็นศูนย์ เพราะมีประจุ เคลื่อนที่ และตั้งฉากกับสนามแม่เหล็ก แรงมีค่ามากที่สุด"},
+{text:"อิเล็กตรอนเคลื่อนที่ทำมุม 30° กับสนามแม่เหล็ก",answer:"nonzero",icon:"📐",visual:"มุม θ = 30° ไม่ใช่ 0° หรือ 180°",reason:"แรงไม่เป็นศูนย์ เพราะ sin30° ไม่เท่ากับศูนย์"},
+{text:"นิวตรอนเคลื่อนที่ผ่านสนามแม่เหล็ก",answer:"zero",icon:"⚪",visual:"นิวตรอนไม่มีประจุไฟฟ้าสุทธิ",reason:"แรงเป็นศูนย์ เพราะนิวตรอนไม่มีประจุไฟฟ้าสุทธิ ทำให้ q = 0"},
+{text:"อนุภาคแอลฟาเคลื่อนที่ตั้งฉากกับสนามแม่เหล็ก",answer:"nonzero",icon:"☢️",visual:"อนุภาคแอลฟามีประจุบวกและ v ตั้งฉากกับ B",reason:"แรงไม่เป็นศูนย์ เพราะมีประจุบวกและเคลื่อนที่ตั้งฉากกับสนามแม่เหล็ก"},
+{text:"อิเล็กตรอนเคลื่อนที่สวนทิศกับสนามแม่เหล็ก",answer:"zero",icon:"↔️",visual:"v สวนทิศกับ B คือ θ = 180°",reason:"แรงเป็นศูนย์ เพราะเคลื่อนที่ขนานแต่สวนทิศกับสนามแม่เหล็ก ทำให้ sin180° = 0"},
+{text:"โปรตอนเคลื่อนที่ผ่านบริเวณที่ไม่มีสนามแม่เหล็ก",answer:"zero",icon:"🚫",visual:"ไม่มีสนามแม่เหล็กในบริเวณนั้น",reason:"แรงเป็นศูนย์ เพราะไม่มีสนามแม่เหล็ก ทำให้ B = 0"},
+{text:"อิเล็กตรอนเคลื่อนที่ตั้งฉากกับสนามแม่เหล็ก",answer:"nonzero",icon:"➖",visual:"อิเล็กตรอนมีประจุลบ และ v ตั้งฉากกับ B",reason:"แรงไม่เป็นศูนย์ เพราะอิเล็กตรอนมีประจุและเคลื่อนที่ตั้งฉากกับสนามแม่เหล็ก"},
+{text:"อนุภาคมีประจุบวกเคลื่อนที่ทำมุม 90° กับสนามแม่เหล็ก",answer:"nonzero",icon:"📐",visual:"มุม θ = 90° ทำให้ sin90° = 1",reason:"แรงไม่เป็นศูนย์ เพราะ sin90° = 1 แรงแม่เหล็กมีค่ามากที่สุด"},
+{text:"อนุภาคมีประจุบวกเคลื่อนที่ทำมุม 0° กับสนามแม่เหล็ก",answer:"zero",icon:"➡️",visual:"มุม θ = 0° คือเคลื่อนที่ขนานกับ B",reason:"แรงเป็นศูนย์ เพราะ sin0° = 0"},
+{text:"อนุภาคมีประจุลบเคลื่อนที่ทำมุม 60° กับสนามแม่เหล็ก",answer:"nonzero",icon:"📐",visual:"มีประจุ เคลื่อนที่ และมุมไม่ใช่ 0° หรือ 180°",reason:"แรงไม่เป็นศูนย์ เพราะมีประจุ เคลื่อนที่ และไม่ขนานกับสนามแม่เหล็ก"},
+{text:"ฝุ่นละอองไม่มีประจุไฟฟ้าเคลื่อนที่ผ่านสนามแม่เหล็ก",answer:"zero",icon:"🌫️",visual:"ไม่มีประจุไฟฟ้า",reason:"แรงเป็นศูนย์ เพราะไม่มีประจุไฟฟ้า ทำให้ q = 0"},
+{text:"ไอออนบวกเคลื่อนที่ผ่านสนามแม่เหล็กโดยทำมุม 45°",answer:"nonzero",icon:"➕",visual:"ไอออนมีประจุ และทำมุมกับ B",reason:"แรงไม่เป็นศูนย์ เพราะไอออนมีประจุและเคลื่อนที่ทำมุมกับสนามแม่เหล็ก"},
+{text:"อิเล็กตรอนเคลื่อนที่ในทิศเดียวกับสนามแม่เหล็ก",answer:"zero",icon:"➡️",visual:"v ไปทิศเดียวกับ B คือ θ = 0°",reason:"แรงเป็นศูนย์ เพราะเคลื่อนที่ในทิศเดียวกับสนามแม่เหล็ก หรือ v ขนานกับ B"}
+];
+
+// ===== STATE =====
+let playerName='', playerClass='', gameScore=0, gameCorrect=0, gameAnswered=false, gameIdx=0, gameReview=[];
+let scoreSubmitted=false;
+const TEACHER_PW='physics2568';
+let lbRefreshInterval=null;
+
+const $=id=>document.getElementById(id);
+
+// ===== SCREEN MANAGEMENT =====
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  $(id).classList.add('active');
+}
+
+// ===== LOGIN =====
+$('nameInput').addEventListener('input',validateLogin);
+$('classSelect').addEventListener('change',validateLogin);
+$('pwInput').addEventListener('keydown',e=>{if(e.key==='Enter')checkTeacherPw()});
+$('nameInput').addEventListener('keydown',e=>{if(e.key==='Enter')$('classSelect').focus()});
+
+function validateLogin(){
+  const name=$('nameInput').value.trim();
+  const cls=$('classSelect').value;
+  $('startBtn').disabled=!(name.length>=2 && cls);
+}
+
+function startGame(){
+  playerName=$('nameInput').value.trim();
+  playerClass=$('classSelect').value;
+  if(!playerName||!playerClass)return;
+  gameScore=0;gameCorrect=0;gameAnswered=false;gameIdx=0;gameReview=[];scoreSubmitted=false;
+  $('playerBadge').textContent='👤 '+playerName+' ('+playerClass+')';
+  $('score').textContent=0;$('correct').textContent=0;$('nextBtn').textContent='ข้อต่อไป';
+  $('game').classList.remove('hidden');
+  document.querySelector('.toolbar').classList.remove('hidden');
+  $('end').classList.remove('show');
+  $('submitBtn').disabled=false;
+  $('submitStatus').textContent='';
+  showScreen('gameScreen');
+  render();
+  scrollTo({top:0,behavior:'smooth'});
+}
+
+function goHome(){
+  clearInterval(lbRefreshInterval);
+  showScreen('loginScreen');
+}
+
+// ===== TEACHER MODAL =====
+function openTeacherModal(){
+  $('pwInput').value='';$('pwError').textContent='';
+  $('teacherModal').style.display='flex';
+  setTimeout(()=>$('pwInput').focus(),100);
+}
+function closeTeacherModal(){$('teacherModal').style.display='none'}
+function checkTeacherPw(){
+  const pw=$('pwInput').value;
+  if(pw===TEACHER_PW){closeTeacherModal();openLeaderboard()}
+  else{$('pwError').textContent='รหัสผ่านไม่ถูกต้อง ลองอีกครั้ง';$('pwInput').select()}
+}
+
+// ===== LEADERBOARD =====
+function openLeaderboard(){
+  showScreen('lbScreen');
+  loadLeaderboard();
+  lbRefreshInterval=setInterval(loadLeaderboard,15000);
+}
+
+function getScores(){
+  try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]')}catch{return[]}
+}
+function saveScores(arr){localStorage.setItem(STORAGE_KEY,JSON.stringify(arr))}
+
+function loadLeaderboard(){
+  const filter=$('classFilter').value;
+  let all=getScores();
+  if(filter)all=all.filter(s=>s.class===filter);
+  // best score per player
+  const best={};
+  all.forEach(s=>{
+    const key=s.name+'|'+s.class;
+    if(!best[key]||s.score>best[key].score||(s.score===best[key].score&&s.attempt>best[key].attempt))best[key]=s;
+  });
+  // count attempts per player
+  const attempts={};
+  getScores().forEach(s=>{const k=s.name+'|'+s.class;attempts[k]=(attempts[k]||0)+1});
+  let rows=Object.values(best).sort((a,b)=>b.score-a.score||a.name.localeCompare(b.name,'th'));
+  const tbody=$('lbBody');
+  if(rows.length===0){tbody.innerHTML='<tr><td colspan="5" class="lb-empty">ยังไม่มีคะแนน เริ่มเล่นเพื่อขึ้น Leaderboard!</td></tr>';$('lastUpdate').textContent='';return}
+  const maxScore=rows[0]?.score||15;
+  tbody.innerHTML=rows.map((r,idx)=>{
+    const key=r.name+'|'+r.class;
+    const att=attempts[key]||1;
+    const medals=['🥇','🥈','🥉'];
+    const medal=medals[idx]||'';
+    const rankClass=idx<3?'rank-'+(idx+1):'';
+    const barW=Math.round(r.score/15*120);
+    return`<tr class="${rankClass}">
+      <td><span class="rank-medal">${medal||'<span style="color:#94a3b8;font-size:14px">'+(idx+1)+'</span>'}</span></td>
+      <td><b>${esc(r.name)}</b></td>
+      <td><span class="class-tag">${esc(r.class)}</span></td>
+      <td><div class="score-bar-wrap"><div class="score-bar" style="width:${barW}px"></div><span>${r.score}/15</span></div></td>
+      <td><span class="attempt-tag">ครั้งที่ ${att}</span></td>
+    </tr>`;
+  }).join('');
+  const t=new Date();
+  $('lastUpdate').textContent='อัปเดตล่าสุด: '+t.toLocaleTimeString('th-TH');
+}
+
+function esc(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+
+function confirmReset(){
+  if(confirm('ลบคะแนนทั้งหมดหรือไม่? (ไม่สามารถกู้คืนได้)')){
+    localStorage.removeItem(STORAGE_KEY);
+    loadLeaderboard();
+  }
+}
+
+// ===== SCORE SUBMISSION =====
+function submitScore(){
+  if(scoreSubmitted)return;
+  $('submitBtn').disabled=true;
+  $('submitStatus').textContent='⏳ กำลังบันทึก...';
+  try{
+    const all=getScores();
+    const att=all.filter(s=>s.name===playerName&&s.class===playerClass).length+1;
+    all.push({name:playerName,class:playerClass,score:gameScore,correct:gameCorrect,attempt:att,ts:Date.now()});
+    saveScores(all);
+    scoreSubmitted=true;
+    $('submitStatus').textContent='✅ บันทึกคะแนนสำเร็จ! (ครั้งที่ '+att+')';
+    $('submitBtn').textContent='✅ ส่งแล้ว';
+  }catch(e){
+    $('submitBtn').disabled=false;
+    $('submitStatus').textContent='❌ เกิดข้อผิดพลาด ลองอีกครั้ง';
+  }
+}
+
+// ===== GAME LOGIC =====
+$('total').textContent=questions.length;
+function render(){
+ const x=questions[gameIdx];
+ $('q').textContent=x.text;$('current').textContent=gameIdx+1;$('cardNo').textContent='บัตรที่ '+(gameIdx+1);
+ $('icon').textContent=x.icon;$('visual').textContent=x.visual;$('feedback').className='feedback';$('feedback').innerHTML='';
+ ['zeroBtn','nonzeroBtn'].forEach(id=>{$(id).classList.remove('correct','wrong');$(id).disabled=false});
+ $('nextBtn').disabled=true;gameAnswered=false;$('bar').style.width=(gameIdx/questions.length*100)+'%';
+}
+function answer(choice){
+ if(gameAnswered)return;gameAnswered=true;const x=questions[gameIdx];const ok=choice===x.answer;
+ if(ok){gameScore++;gameCorrect++;$('feedback').className='feedback show good';$('feedback').innerHTML='✅ ถูกต้อง!<br>'+x.reason}
+ else{$('feedback').className='feedback show bad';$('feedback').innerHTML='❌ ยังไม่ถูก<br>คำตอบที่ถูกคือ <b>'+(x.answer==='zero'?'แรงเป็นศูนย์':'แรงไม่เป็นศูนย์')+'</b><br>'+x.reason}
+ $(x.answer==='zero'?'zeroBtn':'nonzeroBtn').classList.add('correct');
+ if(!ok)$(choice==='zero'?'zeroBtn':'nonzeroBtn').classList.add('wrong');
+ $('zeroBtn').disabled=true;$('nonzeroBtn').disabled=true;$('nextBtn').disabled=false;
+ $('score').textContent=gameScore;$('correct').textContent=gameCorrect;$('nextBtn').textContent=gameIdx===questions.length-1?'ดูผลคะแนน':'ข้อต่อไป';
+ gameReview[gameIdx]={text:x.text,ok,answer:x.answer,reason:x.reason};
+}
+function next(){if(gameIdx<questions.length-1){gameIdx++;render()}else showEnd()}
+function showEnd(){
+ $('game').classList.add('hidden');document.querySelector('.toolbar').classList.add('hidden');$('end').classList.add('show');$('final').textContent=gameScore;
+ $('message').textContent=gameScore>=13?'ยอดเยี่ยมมาก! วิเคราะห์ q, v, B และ θ ได้แม่นยำ':gameScore>=10?'ดีมาก! เข้าใจหลักแรงแม่เหล็กแล้ว':gameScore>=7?'พอใช้ได้ ลองจำเงื่อนไขแรงเป็นศูนย์ให้แม่นขึ้น':'ควรทบทวนหลัก F = |q|vBsinθ อีกครั้ง';
+ $('submitInfo').textContent='ชื่อ: '+playerName+' | ห้อง: '+playerClass+' | คะแนน: '+gameScore+'/15';
+ $('review').innerHTML='';gameReview.forEach((r,n)=>{let d=document.createElement('div');d.className='item '+(r.ok?'ok':'no');d.innerHTML=`<b>ข้อ ${n+1}:</b> ${r.text}<br><b>เฉลย:</b> ${r.answer==='zero'?'แรงเป็นศูนย์':'แรงไม่เป็นศูนย์'}<br>${r.reason}`;$('review').appendChild(d)});
+ scrollTo({top:0,behavior:'smooth'});
+}
+function confirmRestart(){
+  if(gameIdx>0&&!$('end').classList.contains('show')){if(!confirm('เริ่มใหม่? คะแนนปัจจุบันจะหาย'))return}
+  scoreSubmitted=false;gameScore=0;gameCorrect=0;gameAnswered=false;gameReview=[];gameIdx=0;
+  $('score').textContent=0;$('correct').textContent=0;$('nextBtn').textContent='ข้อต่อไป';
+  $('game').classList.remove('hidden');document.querySelector('.toolbar').classList.remove('hidden');
+  $('end').classList.remove('show');$('submitBtn').disabled=false;$('submitBtn').textContent='ส่งคะแนน';$('submitStatus').textContent='';
+  render();scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body>
+</html>
