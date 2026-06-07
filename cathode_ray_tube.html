@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>หลอดรังสีแคโทด — แรงแม่เหล็กกระทำต่ออิเล็กตรอน</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap');
+
+:root {
+  --bg: #060c18;
+  --surface: #0d1a2e;
+  --surface2: #132035;
+  --border: rgba(96,176,255,0.12);
+  --border2: rgba(96,176,255,0.22);
+  --blue: #60b0ff;
+  --blue-dim: rgba(96,176,255,0.15);
+  --green: #34d399;
+  --green-dim: rgba(52,211,153,0.15);
+  --amber: #fbbf24;
+  --amber-dim: rgba(251,191,36,0.15);
+  --red: #f87171;
+  --red-dim: rgba(248,113,113,0.15);
+  --purple: #a78bfa;
+  --text: #e2eaf8;
+  --text2: #8ba4c8;
+  --text3: #4a6485;
+  --mono: 'JetBrains Mono', monospace;
+  --sans: 'IBM Plex Sans Thai', sans-serif;
+  --r: 8px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 100%; min-height: 100dvh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* ─── HEADER ─── */
+header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: sticky; top: 0; z-index: 50;
+}
+.header-icon {
+  width: 32px; height: 32px;
+  background: var(--blue-dim);
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; flex-shrink: 0;
+}
+.header-text h1 { font-size: 14px; font-weight: 600; color: var(--blue); letter-spacing: 0.01em; }
+.header-text p  { font-size: 11px; color: var(--text3); }
+
+/* ─── LAYOUT ─── */
+.main { padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+
+/* Canvas card */
+.canvas-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  overflow: hidden;
+  position: relative;
+}
+canvas { display: block; width: 100%; }
+
+/* ─── CONTROLS ─── */
+.controls-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 12px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+
+.section-label {
+  font-size: 10px; font-weight: 600; letter-spacing: 0.1em;
+  color: var(--text3); text-transform: uppercase; margin-bottom: 4px;
+}
+
+/* Magnet buttons */
+.magnet-btns { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+.mbtn {
+  padding: 7px 4px;
+  background: transparent;
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  color: var(--text2);
+  font-family: var(--sans);
+  font-size: 12px;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.18s;
+  line-height: 1.3;
+}
+.mbtn:hover { background: var(--blue-dim); border-color: var(--blue); color: var(--blue); }
+.mbtn.active-none  { background: var(--surface2); border-color: var(--text3); color: var(--text); }
+.mbtn.active-north { background: rgba(248,113,113,0.18); border-color: var(--red); color: var(--red); }
+.mbtn.active-south { background: rgba(96,176,255,0.18); border-color: var(--blue); color: var(--blue); }
+
+/* Sliders */
+.slider-group { display: flex; flex-direction: column; gap: 6px; }
+.slider-row { display: flex; align-items: center; gap: 8px; }
+.slider-lbl { font-size: 12px; color: var(--text2); min-width: 56px; }
+.slider-row input[type=range] {
+  flex: 1;
+  -webkit-appearance: none;
+  height: 4px;
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+input[type=range].blue-range { background: linear-gradient(to right, var(--blue) 0%, var(--blue) var(--pct, 50%), rgba(96,176,255,0.2) var(--pct, 50%), rgba(96,176,255,0.2) 100%); }
+input[type=range].green-range { background: linear-gradient(to right, var(--green) 0%, var(--green) var(--pct, 50%), rgba(52,211,153,0.2) var(--pct, 50%), rgba(52,211,153,0.2) 100%); }
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 16px; height: 16px;
+  border-radius: 50%; background: var(--bg); border: 2px solid currentColor; cursor: pointer;
+}
+input[type=range].blue-range::-webkit-slider-thumb  { border-color: var(--blue); }
+input[type=range].green-range::-webkit-slider-thumb { border-color: var(--green); }
+input[type=range]::-moz-range-thumb {
+  width: 16px; height: 16px; border-radius: 50%; background: var(--bg); border: 2px solid currentColor; cursor: pointer;
+}
+.slider-val { font-family: var(--mono); font-size: 12px; font-weight: 600; min-width: 36px; text-align: right; }
+.slider-val.blue  { color: var(--blue); }
+.slider-val.green { color: var(--green); }
+
+/* ─── INFO GRID ─── */
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+.info-cell {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 10px;
+}
+.info-lbl { font-size: 10px; color: var(--text3); letter-spacing: 0.04em; margin-bottom: 2px; }
+.info-val { font-family: var(--mono); font-size: 13px; font-weight: 600; }
+.info-val.blue   { color: var(--blue); }
+.info-val.green  { color: var(--green); }
+.info-val.amber  { color: var(--amber); }
+.info-val.red    { color: var(--red); }
+.info-val.purple { color: var(--purple); }
+
+/* ─── FORMULA BOX ─── */
+.formula-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  overflow: hidden;
+}
+.formula-header {
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  padding: 8px 12px;
+  font-size: 11px; font-weight: 600; color: var(--text3);
+  letter-spacing: 0.08em; text-transform: uppercase;
+  display: flex; align-items: center; gap: 6px;
+}
+.formula-header::before {
+  content: '';
+  width: 3px; height: 12px;
+  background: var(--amber);
+  border-radius: 2px;
+  display: inline-block;
+}
+.formula-body { padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
+.formula-row {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 7px 10px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-left: 3px solid transparent;
+  border-radius: 6px;
+  transition: border-left-color 0.2s;
+}
+.formula-row.active-row { border-left-color: var(--amber); }
+.formula-eq {
+  font-family: var(--mono); font-size: 13px; font-weight: 600;
+  color: var(--amber); min-width: 130px; flex-shrink: 0;
+}
+.formula-desc { font-size: 12px; color: var(--text2); line-height: 1.5; }
+
+/* ─── LEGEND ─── */
+.legend {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  padding: 8px 12px;
+  border-top: 1px solid var(--border);
+}
+.leg-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text3); }
+.leg-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+/* ─── RELATIONSHIP SECTION ─── */
+.rel-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  overflow: hidden;
+}
+.rel-header {
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  padding: 8px 12px;
+  font-size: 11px; font-weight: 600; color: var(--text3);
+  letter-spacing: 0.08em; text-transform: uppercase;
+  display: flex; align-items: center; gap: 6px;
+}
+.rel-header::before {
+  content: ''; width: 3px; height: 12px;
+  background: var(--purple); border-radius: 2px; display: inline-block;
+}
+.rel-body { padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; }
+.rel-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 10px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+.rel-cause  { font-size: 12px; color: var(--text2); min-width: 80px; }
+.rel-arrow  { font-family: var(--mono); color: var(--text3); font-size: 14px; }
+.rel-effect { font-size: 12px; font-weight: 600; }
+.rel-note   { font-size: 11px; color: var(--text3); margin-left: auto; font-family: var(--mono); }
+
+/* ─── TABLET / LANDSCAPE ─── */
+@media (min-width: 640px) {
+  .main { padding: 16px; gap: 14px; }
+  header { padding: 12px 20px; }
+  .header-text h1 { font-size: 15px; }
+  .magnet-btns { gap: 8px; }
+  .mbtn { font-size: 13px; padding: 9px 6px; }
+  .formula-eq { font-size: 14px; min-width: 160px; }
+  .formula-desc { font-size: 13px; }
+  .info-grid { grid-template-columns: repeat(4, 1fr); }
+}
+
+/* ─── DESKTOP LANDSCAPE ─── */
+@media (min-width: 900px) {
+  .main {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    grid-template-rows: auto auto auto;
+    gap: 14px;
+  }
+  .canvas-card    { grid-column: 1; grid-row: 1; }
+  .controls-card  { grid-column: 2; grid-row: 1 / 3; align-self: start; }
+  .info-grid      { grid-column: 1; grid-row: 2; grid-template-columns: repeat(4, 1fr); }
+  .formula-section{ grid-column: 1; grid-row: 3; }
+  .rel-section    { grid-column: 2; grid-row: 3; }
+}
+
+@media (min-width: 1200px) {
+  .main { grid-template-columns: 1fr 380px; }
+  header { padding: 14px 28px; }
+  .header-text h1 { font-size: 16px; }
+}
+
+/* iOS safe area */
+@supports (padding: env(safe-area-inset-bottom)) {
+  .main { padding-bottom: calc(12px + env(safe-area-inset-bottom)); }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-icon">⚡</div>
+  <div class="header-text">
+    <h1>หลอดรังสีแคโทด</h1>
+    <p>แรงแม่เหล็กกระทำต่ออิเล็กตรอน — ฟิสิกส์ 5 | หน่วยที่ 15</p>
+  </div>
+</header>
+
+<div class="main">
+
+  <!-- CANVAS -->
+  <div class="canvas-card">
+    <canvas id="crt"></canvas>
+    <div class="legend">
+      <div class="leg-item"><div class="leg-dot" style="background:#60b0ff"></div>อิเล็กตรอน</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#fbbf24"></div>แนวการเคลื่อนที่</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#34d399"></div>แรงแม่เหล็ก F</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#f87171"></div>สนามแม่เหล็ก B</div>
+    </div>
+  </div>
+
+  <!-- CONTROLS -->
+  <div class="controls-card">
+    <div>
+      <div class="section-label">สนามแม่เหล็ก</div>
+      <div class="magnet-btns">
+        <button class="mbtn active-none" id="btnNone"  onclick="setMagnet('none')">ไม่มีสนาม</button>
+        <button class="mbtn" id="btnNorth" onclick="setMagnet('north')">ขั้วเหนือ<br><small>B ออก ⊙</small></button>
+        <button class="mbtn" id="btnSouth" onclick="setMagnet('south')">ขั้วใต้<br><small>B เข้า ⊗</small></button>
+      </div>
+    </div>
+
+    <div class="slider-group">
+      <div class="section-label">ตัวแปรควบคุม</div>
+      <div class="slider-row">
+        <span class="slider-lbl">แรงดัน V</span>
+        <input type="range" id="voltSlider" class="blue-range" min="10" max="100" value="60" step="1">
+        <span class="slider-val blue" id="voltVal">60</span>
+      </div>
+      <div class="slider-row">
+        <span class="slider-lbl">B (เทสลา)</span>
+        <input type="range" id="bSlider" class="green-range" min="0" max="100" value="50" step="1">
+        <span class="slider-val green" id="bVal">0.50</span>
+      </div>
+    </div>
+
+    <!-- INFO cells (mobile: inside controls; tablet+: own row) -->
+    <div class="info-grid" id="infoGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+      <div class="info-cell">
+        <div class="info-lbl">สถานะ B</div>
+        <div class="info-val blue" id="infB">ไม่มี</div>
+      </div>
+      <div class="info-cell">
+        <div class="info-lbl">ทิศแรง F</div>
+        <div class="info-val green" id="infDir">—</div>
+      </div>
+      <div class="info-cell">
+        <div class="info-lbl">การเบน</div>
+        <div class="info-val amber" id="infBend">เส้นตรง</div>
+      </div>
+      <div class="info-cell">
+        <div class="info-lbl">F = qvB</div>
+        <div class="info-val purple" id="infF">0 N</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INFO ROW (desktop only, hidden on mobile by hiding this duplicate) -->
+
+  <!-- FORMULA -->
+  <div class="formula-section">
+    <div class="formula-header">สมการและความสัมพันธ์</div>
+    <div class="formula-body">
+      <div class="formula-row" id="frow1">
+        <span class="formula-eq">eV = ½mv²</span>
+        <span class="formula-desc">แรงดัน V เร่งอิเล็กตรอน — V มาก → v มาก</span>
+      </div>
+      <div class="formula-row" id="frow2">
+        <span class="formula-eq">F = qvB</span>
+        <span class="formula-desc">แรงแม่เหล็ก: v และ B มากขึ้น → F มากขึ้นตามสัดส่วน</span>
+      </div>
+      <div class="formula-row" id="frow3">
+        <span class="formula-eq">r = mv / qB</span>
+        <span class="formula-desc">รัศมีวงกลม: B มาก → r น้อย → เบนมาก</span>
+      </div>
+      <div class="formula-row" id="frow4">
+        <span class="formula-eq">F ⊥ v เสมอ</span>
+        <span class="formula-desc">แรงแม่เหล็กไม่ทำงาน — ไม่เปลี่ยนอัตราเร็ว เปลี่ยนแค่ทิศ</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- RELATIONSHIP -->
+  <div class="rel-section">
+    <div class="rel-header">ตารางความสัมพันธ์</div>
+    <div class="rel-body">
+      <div class="rel-row">
+        <span class="rel-cause" style="color:var(--blue)">V เพิ่ม</span>
+        <span class="rel-arrow">→</span>
+        <span class="rel-effect" style="color:var(--blue)">v เพิ่ม</span>
+        <span class="rel-note">∝ √V</span>
+      </div>
+      <div class="rel-row">
+        <span class="rel-cause" style="color:var(--green)">B เพิ่ม</span>
+        <span class="rel-arrow">→</span>
+        <span class="rel-effect" style="color:var(--green)">F เพิ่ม</span>
+        <span class="rel-note">∝ B</span>
+      </div>
+      <div class="rel-row">
+        <span class="rel-cause" style="color:var(--amber)">v เพิ่ม</span>
+        <span class="rel-arrow">→</span>
+        <span class="rel-effect" style="color:var(--amber)">F เพิ่ม, r เพิ่ม</span>
+        <span class="rel-note">∝ v</span>
+      </div>
+      <div class="rel-row">
+        <span class="rel-cause" style="color:var(--red)">B เพิ่ม</span>
+        <span class="rel-arrow">→</span>
+        <span class="rel-effect" style="color:var(--red)">r ลด</span>
+        <span class="rel-note">∝ 1/B</span>
+      </div>
+      <div class="rel-row">
+        <span class="rel-cause" style="color:var(--purple)">B ออก ⊙</span>
+        <span class="rel-arrow">→</span>
+        <span class="rel-effect" style="color:var(--purple)">F ชี้ขึ้น</span>
+        <span class="rel-note">กฎมือขวา</span>
+      </div>
+      <div class="rel-row">
+        <span class="rel-cause" style="color:var(--text2)">B เข้า ⊗</span>
+        <span class="rel-arrow">→</span>
+        <span class="rel-effect" style="color:var(--text2)">F ชี้ลง</span>
+        <span class="rel-note">กฎมือขวา</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const canvas = document.getElementById('crt');
+const ctx = canvas.getContext('2d');
+let DPR = window.devicePixelRatio || 1;
+let magnetMode = 'none';
+let voltPct = 60, bPct = 50;
+let particles = [], tick = 0;
+
+// ─── resize ───────────────────────────────
+function resize() {
+  DPR = window.devicePixelRatio || 1;
+  const w = canvas.parentElement.clientWidth;
+  const maxH = Math.min(w * 0.55, window.innerHeight * 0.42);
+  const h = Math.max(180, maxH);
+  canvas.style.height = h + 'px';
+  canvas.width  = w * DPR;
+  canvas.height = h * DPR;
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  particles = [];
+}
+
+const cW = () => canvas.width  / DPR;
+const cH = () => canvas.height / DPR;
+const catX  = () => cW() * 0.07;
+const anoX  = () => cW() * 0.25;
+const scrX  = () => cW() * 0.90;
+const midY  = () => cH() / 2;
+
+// ─── physics ──────────────────────────────
+function deflDist() {
+  if (magnetMode === 'none') return 0;
+  const sign = magnetMode === 'north' ? -1 : 1;
+  return sign * (bPct / 100) * cH() * 0.34;
+}
+
+function spawnParticle() {
+  const spd = 2.5 + (voltPct / 100) * 4.5;
+  particles.push({ x: anoX(), y: midY(), vx: spd, vy: 0, life: 1, trail: [] });
+}
+
+function stepParticles() {
+  const def = deflDist();
+  const g = def * 0.003 * (1 + voltPct / 100);
+  particles.forEach(p => {
+    p.trail.push({ x: p.x, y: p.y });
+    if (p.trail.length > 70) p.trail.shift();
+    p.vy += g;
+    p.x += p.vx;
+    p.y += p.vy;
+    p.life -= 0.007;
+  });
+  particles = particles.filter(p => p.life > 0 && p.x < scrX() + 16);
+}
+
+// ─── drawing ──────────────────────────────
+function drawBG() {
+  ctx.fillStyle = '#070d1a';
+  ctx.fillRect(0, 0, cW(), cH());
+  // subtle grid
+  ctx.save();
+  ctx.strokeStyle = 'rgba(96,176,255,0.04)';
+  ctx.lineWidth = 0.5;
+  const step = 28;
+  for (let x = 0; x < cW(); x += step) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, cH()); ctx.stroke(); }
+  for (let y = 0; y < cH(); y += step) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(cW(), y); ctx.stroke(); }
+  ctx.restore();
+}
+
+function drawTube() {
+  const cx = catX(), ax = anoX(), sx = scrX(), my = midY();
+  const th = Math.min(60, cH() * 0.32);
+  ctx.save();
+  ctx.strokeStyle = 'rgba(96,176,255,0.13)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.roundRect(cx - 6, my - th, sx - cx + 26, th * 2, 6);
+  ctx.stroke();
+  ctx.restore();
+}
+
+function drawBField() {
+  const ax = anoX(), sx = scrX(), my = midY();
+  const cols = 7, rows = 4;
+  const xStep = (sx - ax) / (cols + 1);
+  const yStep = cH() * 0.13;
+  ctx.save();
+  ctx.font = `${Math.max(10, cW() * 0.022)}px monospace`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = 'rgba(248,113,113,0.45)';
+  const sym = magnetMode === 'north' ? '⊙' : '⊗';
+  for (let c = 1; c <= cols; c++) {
+    for (let r = -Math.floor(rows / 2); r <= Math.floor(rows / 2); r++) {
+      ctx.fillText(sym, ax + c * xStep, my + r * yStep);
+    }
+  }
+  ctx.restore();
+}
+
+function drawElectrodes() {
+  const cx = catX(), ax = anoX(), my = midY();
+  const eh = Math.min(22, cH() * 0.14);
+  const fs = Math.max(10, cW() * 0.022);
+
+  // cathode
+  ctx.save();
+  ctx.fillStyle = '#666';
+  ctx.fillRect(cx - 3, my - eh, 7, eh * 2);
+
+  // hot filament dots
+  ctx.fillStyle = 'rgba(255,160,60,0.75)';
+  for (let i = -2; i <= 2; i++) {
+    ctx.beginPath(); ctx.arc(cx + 2, my + i * (eh / 2.5), 1.5, 0, Math.PI * 2); ctx.fill();
+  }
+
+  // anode
+  ctx.fillStyle = '#444';
+  ctx.fillRect(ax - 2, my - eh, 5, eh * 2);
+
+  // labels
+  ctx.font = `${fs}px ${getComputedStyle(document.body).fontFamily}`;
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#f87171';
+  ctx.fillText('C', cx, my - eh - 6);
+  ctx.fillStyle = '#60b0ff';
+  ctx.fillText('A', ax, my - eh - 6);
+  ctx.restore();
+}
+
+function drawScreen() {
+  const sx = scrX(), my = midY();
+  const sh = Math.min(80, cH() * 0.4);
+  const def = deflDist();
+  const iy = my + def;
+
+  ctx.save();
+  ctx.fillStyle = 'rgba(30,60,100,0.7)';
+  ctx.fillRect(sx, my - sh, 10, sh * 2);
+  ctx.strokeStyle = 'rgba(96,176,255,0.25)';
+  ctx.lineWidth = 0.5;
+  ctx.strokeRect(sx, my - sh, 10, sh * 2);
+
+  // glow at impact
+  const g = ctx.createRadialGradient(sx + 5, iy, 0, sx + 5, iy, 24);
+  g.addColorStop(0, 'rgba(180,255,160,0.98)');
+  g.addColorStop(0.4, 'rgba(80,220,80,0.55)');
+  g.addColorStop(1, 'rgba(0,180,60,0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(sx - 10, iy - 28, 50, 56);
+  ctx.restore();
+}
+
+function drawTrails() {
+  particles.forEach(p => {
+    if (p.trail.length < 2) return;
+    ctx.save();
+    for (let i = 1; i < p.trail.length; i++) {
+      const a = (i / p.trail.length) * 0.55;
+      ctx.strokeStyle = `rgba(251,191,36,${a})`;
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(p.trail[i-1].x, p.trail[i-1].y);
+      ctx.lineTo(p.trail[i].x, p.trail[i].y);
+      ctx.stroke();
+    }
+    ctx.restore();
+  });
+}
+
+function drawParticles() {
+  particles.forEach(p => {
+    ctx.save();
+    ctx.globalAlpha = p.life;
+    const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, 4.5);
+    g.addColorStop(0, '#b8d8ff');
+    g.addColorStop(0.5, '#60b0ff');
+    g.addColorStop(1, 'rgba(96,176,255,0)');
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(p.x, p.y, 4.5, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  });
+}
+
+function drawForceArrow() {
+  const def = deflDist();
+  if (Math.abs(def) < 2) return;
+  const ax = anoX(), sx = scrX(), my = midY();
+  const cx = (ax + sx) / 2;
+  const dir = def < 0 ? -1 : 1;
+  const len = Math.min(32, cH() * 0.16);
+
+  ctx.save();
+  ctx.strokeStyle = '#34d399';
+  ctx.fillStyle = '#34d399';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(cx, my);
+  ctx.lineTo(cx, my + dir * len);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(cx, my + dir * len);
+  ctx.lineTo(cx - 6, my + dir * (len - 9));
+  ctx.lineTo(cx + 6, my + dir * (len - 9));
+  ctx.closePath(); ctx.fill();
+  ctx.font = `bold ${Math.max(11, cW() * 0.022)}px var(--mono, monospace)`;
+  ctx.fillStyle = '#34d399';
+  ctx.textAlign = 'left';
+  ctx.fillText('F', cx + 9, my + dir * len * 0.55);
+  ctx.restore();
+}
+
+function drawLabels() {
+  const cx = catX(), ax = anoX(), sx = scrX(), my = midY();
+  const fs = Math.max(9, cW() * 0.020);
+  ctx.save();
+  ctx.font = `${fs}px var(--sans, sans-serif)`;
+  ctx.textAlign = 'center';
+  ctx.fillStyle = 'rgba(139,164,200,0.6)';
+  ctx.fillText('แคโทด', cx, cH() - 6);
+  ctx.fillText('แอโนด', ax, cH() - 6);
+  ctx.fillText('ฉากเรืองแสง', sx + 5, cH() - 6);
+  if (magnetMode !== 'none') {
+    ctx.fillStyle = 'rgba(248,113,113,0.75)';
+    ctx.fillText(magnetMode === 'north' ? 'B ออกจากหน้าจอ (⊙)' : 'B เข้าสู่หน้าจอ (⊗)', (ax + sx) / 2, 16);
+  }
+  ctx.restore();
+}
+
+// ─── update info panel ────────────────────
+function updateInfo() {
+  const q = 1.6e-19;
+  const v = 1e7 * (voltPct / 100);
+  const B = bPct / 100;
+  const F = magnetMode !== 'none' ? (q * v * B).toExponential(2) + ' N' : '0 N';
+
+  document.getElementById('infB').textContent =
+    magnetMode === 'none' ? 'ไม่มี' : magnetMode === 'north' ? 'B ออก ⊙' : 'B เข้า ⊗';
+  document.getElementById('infDir').textContent =
+    magnetMode === 'none' ? '—' : magnetMode === 'north' ? 'ขึ้น ↑' : 'ลง ↓';
+  document.getElementById('infBend').textContent =
+    magnetMode === 'none' ? 'เส้นตรง' : deflDist() < 0 ? 'เบนขึ้น' : 'เบนลง';
+  document.getElementById('infF').textContent = F;
+
+  // highlight active formula row
+  ['frow1','frow2','frow3','frow4'].forEach(id => document.getElementById(id).classList.remove('active-row'));
+  if (magnetMode !== 'none') {
+    document.getElementById('frow2').classList.add('active-row');
+    document.getElementById('frow3').classList.add('active-row');
+  }
+}
+
+// ─── animation loop ───────────────────────
+function animate() {
+  tick++;
+  const spawnRate = Math.max(2, Math.round(9 - voltPct / 14));
+  if (tick % spawnRate === 0) spawnParticle();
+  stepParticles();
+
+  drawBG();
+  drawTube();
+  if (magnetMode !== 'none') drawBField();
+  drawElectrodes();
+  drawScreen();
+  drawTrails();
+  drawParticles();
+  if (magnetMode !== 'none') drawForceArrow();
+  drawLabels();
+  updateInfo();
+
+  requestAnimationFrame(animate);
+}
+
+// ─── controls ─────────────────────────────
+window.setMagnet = function(mode) {
+  magnetMode = mode;
+  particles = [];
+  ['btnNone','btnNorth','btnSouth'].forEach(id => {
+    const b = document.getElementById(id);
+    b.className = 'mbtn';
+  });
+  const map = { none: ['btnNone','active-none'], north: ['btnNorth','active-north'], south: ['btnSouth','active-south'] };
+  document.getElementById(map[mode][0]).classList.add(map[mode][1]);
+};
+
+// slider fill update
+function updateSliderFill(el, pct) {
+  el.style.setProperty('--pct', pct + '%');
+}
+
+document.getElementById('voltSlider').addEventListener('input', function() {
+  voltPct = +this.value;
+  document.getElementById('voltVal').textContent = this.value;
+  updateSliderFill(this, ((+this.value - 10) / 90) * 100);
+  particles = [];
+});
+document.getElementById('bSlider').addEventListener('input', function() {
+  bPct = +this.value;
+  document.getElementById('bVal').textContent = (+this.value / 100).toFixed(2);
+  updateSliderFill(this, this.value);
+  particles = [];
+});
+
+// init sliders
+updateSliderFill(document.getElementById('voltSlider'), ((60 - 10) / 90) * 100);
+updateSliderFill(document.getElementById('bSlider'), 50);
+
+// resize
+const ro = new ResizeObserver(() => { resize(); });
+ro.observe(canvas.parentElement);
+resize();
+animate();
+</script>
+</body>
+</html>
