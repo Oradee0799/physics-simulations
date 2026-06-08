@@ -361,9 +361,11 @@ const AV_COLORS=['av0','av1','av2','av3','av4','av5','av6','av7','av8','av9'];
 async function sbFetch(table,params='',method='GET',body=null){
   const opts={method,headers:{...H,'Accept':'application/json'}};
   if(body){opts.body=JSON.stringify(body);opts.headers['Prefer']='return=minimal'}
+  if(method==='DELETE'){opts.headers['Prefer']='return=minimal'}
   const r=await fetch(SB+'/'+table+'?'+params,opts);
-  if(!r.ok)throw new Error(await r.text());
+  if(!r.ok){const txt=await r.text();throw new Error(txt);}
   if(method==='GET')return r.json();
+  return null;
 }
 
 // ===== STATE =====
@@ -659,7 +661,8 @@ function goHome(){
 }
 
 async function loadAll(){
-  await Promise.all([loadLeaderboard(),loadMcLbMap()]);
+  try{await Promise.all([loadLeaderboard(),loadMcLbMap()]);}
+  catch(e){console.warn('loadAll err',e);}
 }
 
 async function loadLeaderboard(){
@@ -708,6 +711,7 @@ async function loadMcLbMap(){
 // ===== EXPORT EXCEL =====
 async function exportExcel(){
   try{
+    if(typeof XLSX==='undefined'){alert('กรุณารอสักครู่แล้วลองอีกครั้ง');return;}
     const filter=$('classFilter').value;
     let params='order=class.asc,score.desc,student_name.asc&limit=500';
     if(filter)params+='&class=eq.'+encodeURIComponent(filter);
@@ -731,19 +735,20 @@ async function exportExcel(){
     ws['!cols']=[{wch:6},{wch:18},{wch:28},{wch:8},{wch:8},{wch:10},{wch:8},{wch:22}];
     XLSX.utils.book_append_sheet(wb,ws,'คะแนนเกมแรงแม่เหล็ก');
     XLSX.writeFile(wb,'game_scores_magnetic_force.xlsx');
-  }catch(e){alert('Export ไม่สำเร็จ: '+e.message)}
+    alert('✅ Export สำเร็จ! '+all.length+' รายการ');
+  }catch(e){alert('Export ไม่สำเร็จ: '+e.message);console.error(e);}
 }
 
 async function confirmResetScores(){
   if(confirm('ลบคะแนนทั้งหมดใน game_scores หรือไม่?')){
-    try{await sbFetch('game_scores','id=gte.0','DELETE');loadLeaderboard()}
-    catch(e){alert('ลบไม่สำเร็จ: '+e.message)}
+    try{await sbFetch('game_scores','id=gt.0','DELETE');await loadLeaderboard();alert('✅ ล้างคะแนนเรียบร้อย');}
+    catch(e){alert('ลบไม่สำเร็จ: '+e.message);console.error(e);}
   }
 }
 async function confirmResetProgress(){
   if(confirm('ล้าง Progress map ทั้งหมดหรือไม่?')){
-    try{await sbFetch('game_progress','id=gte.0','DELETE');loadMcLbMap()}
-    catch(e){alert('ล้างไม่สำเร็จ: '+e.message)}
+    try{await sbFetch('game_progress','id=gt.0','DELETE');await loadMcLbMap();alert('✅ ล้าง Progress เรียบร้อย');}
+    catch(e){alert('ล้างไม่สำเร็จ: '+e.message);console.error(e);}
   }
 }
 
