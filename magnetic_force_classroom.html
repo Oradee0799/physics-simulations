@@ -759,12 +759,22 @@ async function submitScore(){
   try{
     const prev=await sbFetch('game_scores','select=id&student_id=eq.'+playerId+'&class=eq.'+encodeURIComponent(playerClass));
     const att=(prev||[]).length+1;
-    await fetch(SB+'/game_scores',{method:'POST',headers:{...H,'Prefer':'return=minimal'},
-      body:JSON.stringify({student_id:playerId,student_name:playerName,class:playerClass,score:gameScore,correct:gameCorrect,attempt:att,ts:Date.now()})});
+    const payload={student_id:playerId,student_name:playerName,class:playerClass,score:gameScore,correct:gameCorrect,attempt:att,ts:Date.now()};
+    console.log('Submitting score:', payload);
+    const r=await fetch(SB+'/game_scores',{
+      method:'POST',
+      headers:{...H,'Prefer':'return=minimal'},
+      body:JSON.stringify(payload)
+    });
+    if(!r.ok){const txt=await r.text();throw new Error('HTTP '+r.status+': '+txt);}
     scoreSubmitted=true;
     $('submitStatus').textContent='✅ บันทึกสำเร็จ! (ครั้งที่ '+att+')';
     $('submitBtn').textContent='✅ ส่งแล้ว';
-  }catch(e){$('submitBtn').disabled=false;$('submitStatus').textContent='❌ '+e.message}
+  }catch(e){
+    $('submitBtn').disabled=false;
+    $('submitStatus').textContent='❌ '+e.message;
+    console.error('submitScore error:',e);
+  }
 }
 
 // ===== QUESTIONS =====
