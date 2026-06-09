@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>บัตรทิศทางแรงแม่เหล็ก — Minecraft Edition</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;700&display=swap');
+:root {
+  --fs-xs:clamp(11px,1.2vw,14px);--fs-sm:clamp(13px,1.5vw,17px);--fs-md:clamp(15px,1.8vw,21px);
+  --fs-lg:clamp(18px,2.4vw,30px);--fs-xl:clamp(22px,3vw,38px);
+  --gap-sm:clamp(6px,1vw,14px);--gap-md:clamp(10px,1.5vw,22px);--gap-lg:clamp(14px,2vw,30px);
+  --pad:clamp(12px,2.2vw,32px);
+  --btn-h:clamp(52px,6.5vw,84px);
+  --charge-sz:clamp(50px,7.5vw,96px);
+  --field-cell:clamp(16px,2.4vw,32px);
+  --fbox-w:clamp(52px,7.5vw,96px);--fbox-h:clamp(44px,5.8vw,74px);
+  --mc-gold:#F5C842;--mc-dia:#5CE8E8;--mc-em:#90FF70;--mc-red:#FF9090;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Sarabun',sans-serif;background:#2C3E50;
+  background-image:repeating-linear-gradient(0deg,transparent,transparent 31px,rgba(0,0,0,.07) 31px,rgba(0,0,0,.07) 32px),
+  repeating-linear-gradient(90deg,transparent,transparent 31px,rgba(0,0,0,.07) 31px,rgba(0,0,0,.07) 32px);
+  min-height:100vh;color:#fff}
+/* HEADER */
+.mc-hdr{background:#111;border-bottom:3px solid var(--mc-gold);padding:clamp(8px,1.2vw,20px) var(--pad);display:flex;align-items:center;gap:clamp(8px,1.2vw,18px)}
+.mc-logo{width:clamp(30px,4vw,52px);height:clamp(30px,4vw,52px);display:grid;grid-template-columns:repeat(4,1fr);gap:1px;flex-shrink:0}
+.mc-logo div{width:100%;height:100%}
+.hdr-title{font-size:clamp(14px,2.2vw,26px);font-weight:700;color:var(--mc-gold);text-shadow:2px 2px 0 #000,-1px -1px 0 #000;letter-spacing:.5px}
+.hdr-sub{font-size:clamp(10px,1.1vw,14px);color:#777;text-shadow:1px 1px 0 #000;margin-top:2px}
+/* NAV */
+.mc-nav{display:flex;background:#111;border-bottom:3px solid var(--mc-gold)}
+.mc-nav-btn{flex:1;padding:clamp(8px,1.2vw,18px) 4px;font-family:'Sarabun',sans-serif;font-size:clamp(12px,1.4vw,18px);font-weight:700;background:#222;color:#777;border:none;border-right:1px solid #000;cursor:pointer;text-shadow:1px 1px 0 #000;transition:background .1s,color .1s;white-space:nowrap}
+.mc-nav-btn:last-child{border-right:none}
+.mc-nav-btn:hover{background:#333;color:#ccc}
+.mc-nav-btn.active{background:#4A3E10;color:var(--mc-gold);border-bottom:3px solid var(--mc-gold)}
+/* SCREEN */
+.screen{display:none}.screen.active{display:block}
+.content{max-width:900px;margin:0 auto;padding:var(--gap-md) var(--pad)}
+/* GRASS */
+.grass-bar{height:clamp(10px,1.5vw,20px);background:repeating-linear-gradient(90deg,#5D8A3C 0,#5D8A3C 8px,#4A7A2A 8px,#4A7A2A 16px);border-top:3px solid #7FC050;border-bottom:3px solid #3A5A1A;margin-bottom:var(--gap-md)}
+/* PANEL */
+.mc-panel{background:#3A3A3A;border-top:3px solid #6A6A6A;border-left:3px solid #6A6A6A;border-right:3px solid #1A1A1A;border-bottom:3px solid #1A1A1A;padding:var(--gap-lg);margin-bottom:var(--gap-md)}
+.mc-panel.grass{background:#3E4E2E;border-top:4px solid #7FC050;border-left:4px solid #6A8A4A;border-right:4px solid #2A3A1A;border-bottom:4px solid #2A3A1A}
+.mc-panel.wood{background:#5A401A;border-top:3px solid #9C7A3C;border-left:3px solid #9C7A3C;border-right:3px solid #2A1808;border-bottom:3px solid #2A1808}
+.mc-panel.diamond{background:#152A2A;border-top:3px solid var(--mc-dia);border-left:3px solid var(--mc-dia);border-right:3px solid #0A1A1A;border-bottom:3px solid #0A1A1A}
+/* SECTION TITLE */
+.sec-title{font-size:clamp(15px,2vw,24px);font-weight:700;color:var(--mc-gold);text-shadow:2px 2px 0 #000;margin-bottom:var(--gap-md);display:flex;align-items:center;gap:8px}
+.sec-title::before{content:'';display:inline-block;width:clamp(10px,1.5vw,18px);height:clamp(10px,1.5vw,18px);background:var(--mc-gold);border-top:2px solid #fff;border-left:2px solid #fff;border-right:2px solid #7A6010;border-bottom:2px solid #7A6010;flex-shrink:0}
+/* BUTTONS */
+.mc-btn{display:block;width:100%;padding:clamp(10px,1.3vw,20px) var(--pad);font-family:'Sarabun',sans-serif;font-size:clamp(14px,1.8vw,23px);font-weight:700;color:#fff;background:#4A4A4A;border-top:3px solid #7A7A7A;border-left:3px solid #7A7A7A;border-right:3px solid #1A1A1A;border-bottom:3px solid #1A1A1A;cursor:pointer;text-shadow:2px 2px 0 #000;transition:filter .1s}
+.mc-btn:hover:not(:disabled){filter:brightness(1.2)}.mc-btn:active:not(:disabled){border-top:3px solid #1A1A1A;border-left:3px solid #1A1A1A;border-right:3px solid #7A7A7A;border-bottom:3px solid #7A7A7A;filter:brightness(.9)}
+.mc-btn.green{background:#2A5A1A;border-top-color:#5DB840;border-left-color:#5DB840;border-right-color:#0A2A08;border-bottom-color:#0A2A08}
+.mc-btn.blue{background:#1A4A7A;border-top-color:#3A9ACA;border-left-color:#3A9ACA;border-right-color:#0A1A3A;border-bottom-color:#0A1A3A}
+.mc-btn.red{background:#6A1A1A;border-top-color:#CA3A3A;border-left-color:#CA3A3A;border-right-color:#2A0A0A;border-bottom-color:#2A0A0A}
+.mc-btn.gold{background:#6A4E10;border-top-color:#F5C842;border-left-color:#F5C842;border-right-color:#2A1E04;border-bottom-color:#2A1E04;color:#FFF8DC}
+/* INPUT */
+.mc-label{font-size:var(--fs-sm);color:#AAA;text-shadow:1px 1px 0 #000;display:block;margin-bottom:5px}
+.mc-input{width:100%;background:#111;border:2px solid #5A5A5A;color:#fff;font-family:'Sarabun',sans-serif;font-size:var(--fs-md);padding:clamp(9px,1.2vw,16px) clamp(10px,1.4vw,20px);outline:none;caret-color:var(--mc-dia)}
+.mc-input:focus{border-color:var(--mc-dia)}.mc-input::placeholder{color:#555}
+/* STATS */
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--gap-sm);margin-top:var(--gap-sm)}
+.stat-block{background:#111;border-top:3px solid #5A5A5A;border-left:3px solid #5A5A5A;border-right:3px solid #000;border-bottom:3px solid #000;padding:clamp(12px,1.8vw,26px);text-align:center}
+.stat-num{font-size:clamp(28px,5vw,64px);font-weight:700;text-shadow:2px 2px 0 #000;line-height:1.1}
+.stat-lbl{font-size:var(--fs-sm);color:#777;margin-top:3px}
+/* QUIZ VISUAL */
+.quiz-visual{background:#182818;border-top:3px solid var(--mc-dia);border-left:3px solid var(--mc-dia);border-right:3px solid #0A1A1A;border-bottom:3px solid #0A1A1A;padding:var(--gap-lg);margin-bottom:var(--gap-md)}
+.quiz-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--gap-md);flex-wrap:wrap;gap:var(--gap-sm)}
+.card-num{font-size:clamp(18px,3vw,40px);font-weight:700;width:clamp(40px,5.5vw,70px);height:clamp(40px,5.5vw,70px);display:flex;align-items:center;justify-content:center;text-shadow:2px 2px 0 #000;background:#3A2E10;border-top:3px solid var(--mc-gold);border-left:3px solid var(--mc-gold);border-right:3px solid #7A6010;border-bottom:3px solid #7A6010;color:var(--mc-gold);flex-shrink:0}
+.lbl-tag{padding:clamp(3px,.5vw,8px) clamp(8px,1.2vw,18px);font-size:var(--fs-sm);font-weight:700;text-shadow:1px 1px 0 #000;border-top:2px solid rgba(255,255,255,.25);border-left:2px solid rgba(255,255,255,.25);border-right:2px solid rgba(0,0,0,.4);border-bottom:2px solid rgba(0,0,0,.4)}
+.lbl-tag.blue{background:#1A4A7A;color:var(--mc-dia)}
+.id-tag{font-size:var(--fs-sm);color:#AAA;text-shadow:1px 1px 0 #000;text-align:right;flex:1;min-width:0}
+/* PHYSICS */
+.physics-scene{display:flex;align-items:center;justify-content:center;gap:clamp(14px,3vw,56px);padding:var(--gap-md) 0 var(--gap-sm);flex-wrap:nowrap}
+.charge-block{width:var(--charge-sz);height:var(--charge-sz);display:flex;align-items:center;justify-content:center;font-size:clamp(24px,4vw,52px);font-weight:700;text-shadow:2px 2px 0 #000;flex-shrink:0}
+.charge-pos{background:#5A1A3A;border-top:3px solid #EA6AAA;border-left:3px solid #EA6AAA;border-right:3px solid #2A0818;border-bottom:3px solid #2A0818;color:#FFAACC}
+.charge-neg{background:#1A2E5A;border-top:3px solid #6AAAFF;border-left:3px solid #6AAAFF;border-right:3px solid #080E2A;border-bottom:3px solid #080E2A;color:#AACCFF}
+.arrow-col{display:flex;flex-direction:column;align-items:center;gap:clamp(2px,.4vw,6px)}
+.arrow-lbl{font-size:clamp(12px,1.5vw,20px);font-style:italic;color:#AAA;text-shadow:1px 1px 0 #000}
+.arrow-sym{font-size:clamp(28px,5vw,64px);font-weight:700;color:var(--mc-gold);text-shadow:2px 2px 0 #000;line-height:1}
+.field-wrap{display:flex;flex-direction:column;align-items:center;gap:clamp(3px,.5vw,7px)}
+.field-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(2px,.4vw,5px)}
+.field-cell{width:var(--field-cell);height:var(--field-cell);background:#0A0A0A;display:flex;align-items:center;justify-content:center;font-size:clamp(10px,1.4vw,20px);font-weight:700}
+.field-dot{border:1px solid var(--mc-dia);color:var(--mc-dia)}
+.field-cross{border:1px solid #FF6666;color:#FF6666}
+.field-lbl{font-size:clamp(10px,1.3vw,17px);color:#AAA;text-shadow:1px 1px 0 #000;text-align:center;white-space:nowrap}
+.f-box{width:var(--fbox-w);height:var(--fbox-h);background:#111;border-top:3px solid #7A7A7A;border-left:3px solid #7A7A7A;border-right:3px solid #111;border-bottom:3px solid #111;display:flex;align-items:center;justify-content:center;font-size:clamp(13px,2vw,26px);font-weight:700;color:#fff;text-shadow:1px 1px 0 #000;flex-shrink:0}
+.q-text{text-align:center;font-size:clamp(15px,2vw,26px);font-weight:700;color:var(--mc-dia);padding:var(--gap-sm) 0;text-shadow:1px 1px 0 #000;margin-top:var(--gap-sm)}
+.special-note{text-align:center;font-size:clamp(11px,1.4vw,18px);color:#888;text-shadow:1px 1px 0 #000;margin-bottom:2px}
+/* DIR BUTTONS */
+.shuffle-note{text-align:center;font-size:clamp(11px,1.3vw,16px);color:#666;font-style:italic;text-shadow:1px 1px 0 #000;padding:clamp(4px,.6vw,10px) 0}
+.dir-grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(6px,1vw,16px)}
+.dir-btn{height:var(--btn-h);font-size:clamp(28px,4.5vw,58px);font-family:'Sarabun',sans-serif;background:#3A3A3A;border-top:3px solid #6A6A6A;border-left:3px solid #6A6A6A;border-right:3px solid #111;border-bottom:3px solid #111;color:#fff;cursor:pointer;text-shadow:2px 2px 0 #000;transition:filter .1s;display:flex;align-items:center;justify-content:center}
+.dir-btn:hover:not(:disabled){filter:brightness(1.3);background:#4A4A4A}
+.dir-btn:active:not(:disabled){border-top:3px solid #111;border-left:3px solid #111;border-right:3px solid #6A6A6A;border-bottom:3px solid #6A6A6A}
+.dir-btn:disabled{cursor:default}
+.dir-btn.ok{background:#1A3A1A;border-top-color:#5DB840;border-left-color:#5DB840;border-right-color:#0A1A0A;border-bottom-color:#0A1A0A;color:var(--mc-em)}
+.dir-btn.no{background:#3A1A1A;border-top-color:#CA3A3A;border-left-color:#CA3A3A;border-right-color:#0A0A0A;border-bottom-color:#0A0A0A;color:var(--mc-red)}
+.dir-zero{height:clamp(48px,6vw,76px);font-size:clamp(15px,2vw,24px);margin-top:clamp(6px,1vw,16px)}
+/* RESULT */
+.result-bar{display:flex;align-items:center;gap:clamp(10px,1.5vw,22px);padding:clamp(12px,1.5vw,22px) clamp(14px,2vw,28px);margin-top:var(--gap-md);border:3px solid}
+.result-ok{background:#162A16;border-color:#5DB840}
+.result-no{background:#2A1212;border-color:#CA3A3A}
+.result-icon{font-size:clamp(30px,4.5vw,58px);line-height:1}
+.result-title{font-size:clamp(16px,2.2vw,28px);font-weight:700;text-shadow:1px 1px 0 #000}
+.result-sub{font-size:clamp(12px,1.5vw,19px);color:#BBB;margin-top:3px;text-shadow:1px 1px 0 #000}
+/* ID REF */
+.id-ref-panel{background:#1A1A1A;border:2px solid #3A3A3A;padding:var(--gap-md);margin-top:var(--gap-md)}
+.id-ref-title{font-size:var(--fs-sm);color:#777;margin-bottom:var(--gap-sm);text-shadow:1px 1px 0 #000}
+.id-ref-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(clamp(140px,18vw,220px),1fr));gap:clamp(2px,.5vw,6px)}
+.id-ref-item{font-size:clamp(11px,1.2vw,15px);color:#777;padding:3px 0;cursor:pointer;text-shadow:1px 1px 0 #000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.id-ref-item:hover{color:#ccc}
+.id-ref-item span{color:var(--mc-dia)}
+.id-ref-cls{grid-column:1/-1;font-size:clamp(12px,1.4vw,17px);color:var(--mc-gold);font-weight:700;text-shadow:1px 1px 0 #000;margin-top:clamp(6px,1vw,12px);padding-bottom:3px;border-bottom:1px solid #3A3A3A}
+/* SCOREBOARD */
+.sb-row{display:flex;align-items:center;gap:clamp(6px,1vw,16px);padding:clamp(8px,1.1vw,16px) 0;border-bottom:1px solid #2A2A2A}
+.sb-row:last-child{border-bottom:none}
+.sb-idx{font-size:var(--fs-sm);color:#555;text-shadow:1px 1px 0 #000;min-width:clamp(18px,2.2vw,32px)}
+.sb-card{width:clamp(30px,4vw,52px);height:clamp(30px,4vw,52px);background:#3A2E10;border-top:2px solid var(--mc-gold);border-left:2px solid var(--mc-gold);border-right:2px solid #1A1408;border-bottom:2px solid #1A1408;display:flex;align-items:center;justify-content:center;font-size:clamp(13px,1.8vw,22px);font-weight:700;color:var(--mc-gold);text-shadow:1px 1px 0 #000;flex-shrink:0}
+.sb-name{font-size:var(--fs-md);font-weight:500;text-shadow:1px 1px 0 #000;line-height:1.2}
+.sb-sub{font-size:var(--fs-xs);color:#555}
+.sb-badge{padding:clamp(2px,.4vw,7px) clamp(6px,1vw,14px);font-size:var(--fs-sm);font-weight:700;text-shadow:1px 1px 0 #000;border:2px solid;white-space:nowrap}
+.sb-ok{background:#162A16;border-color:#5DB840;color:var(--mc-em)}
+.sb-no{background:#2A1212;border-color:#CA3A3A;color:var(--mc-red)}
+/* EXPORT */
+.export-area{background:#0A0A0A;border:2px solid #2A2A2A;color:var(--mc-em);font-family:monospace;font-size:clamp(11px,1.2vw,15px);padding:var(--gap-md);white-space:pre-wrap;word-break:break-all;max-height:clamp(160px,22vw,300px);overflow-y:auto;margin-top:var(--gap-md)}
+/* INFO TEXT */
+.info-text{font-size:var(--fs-md);color:#C8E8A0;line-height:2;text-shadow:1px 1px 0 #000;margin-bottom:var(--gap-lg)}
+/* NAME */
+#nameDisplay{font-size:var(--fs-sm);min-height:clamp(16px,2vw,26px);text-shadow:1px 1px 0 #000;margin-top:6px}
+/* WIDE: 2-col input */
+@media(min-width:700px){
+  .input-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--gap-md);align-items:start}
+}
+</style>
+</head>
+<body>
+
+<div class="mc-hdr">
+  <div class="mc-logo" aria-hidden="true">
+    <div style="background:#5D8A3C"></div><div style="background:#866043"></div><div style="background:#5D8A3C"></div><div style="background:#866043"></div>
+    <div style="background:#866043"></div><div style="background:#5A5A5A"></div><div style="background:#866043"></div><div style="background:#5A5A5A"></div>
+    <div style="background:#5A5A5A"></div><div style="background:#866043"></div><div style="background:#5A5A5A"></div><div style="background:#866043"></div>
+    <div style="background:#5CE8E8"></div><div style="background:#5A5A5A"></div><div style="background:#5CE8E8"></div><div style="background:#5A5A5A"></div>
+  </div>
+  <div>
+    <div class="hdr-title">บัตรทิศทางแรงแม่เหล็ก</div>
+    <div class="hdr-sub">Minecraft Physics Edition ⚡</div>
+  </div>
+</div>
+
+<div class="mc-nav">
+  <button class="mc-nav-btn active" onclick="goS('Home')">🏠 หน้าหลัก</button>
+  <button class="mc-nav-btn" onclick="goS('Quiz')">⚡ ทดสอบ</button>
+  <button class="mc-nav-btn" onclick="goS('Board')">🏆 บอร์ด</button>
+  <button class="mc-nav-btn" onclick="goS('Report')">📋 รายงาน</button>
+</div>
+
+<!-- HOME -->
+<div id="sHome" class="screen active">
+<div class="content">
+  <div class="grass-bar"></div>
+  <div class="mc-panel grass">
+    <div class="sec-title">สวัสดีนักสำรวจ!</div>
+    <div class="info-text">🧲 ใช้กฎมือขวาเพื่อหาทิศของแรงแม่เหล็ก<br>📋 กรอก ID → โจทย์เด้งขึ้น → กดเลือกทิศ<br>🔀 ปุ่มตอบสุ่มตำแหน่งทุกครั้ง ห้ามจำตำแหน่ง!<br>🏆 ดูสกอร์บอร์ดบนจอใหญ่ในห้องเรียน</div>
+    <button class="mc-btn gold" onclick="goS('Quiz')">⚡ เริ่มผจญภัย!</button>
+  </div>
+  <div class="mc-panel">
+    <div class="sec-title">สถิติห้องเรียน</div>
+    <div class="stat-grid">
+      <div class="stat-block"><div class="stat-num" style="color:var(--mc-dia)" id="stT">0</div><div class="stat-lbl">ตอบแล้ว</div></div>
+      <div class="stat-block"><div class="stat-num" style="color:var(--mc-em)" id="stC">0</div><div class="stat-lbl">ถูกต้อง</div></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- QUIZ -->
+<div id="sQuiz" class="screen">
+<div class="content">
+  <div class="grass-bar"></div>
+  <div id="qInput">
+    <div class="input-row">
+      <div class="mc-panel diamond">
+        <div class="sec-title">กรอกข้อมูล</div>
+        <div style="margin-bottom:var(--gap-md)">
+          <label class="mc-label">รหัสนักเรียน (Student ID)</label>
+          <input type="number" id="iId" class="mc-input" placeholder="เช่น 175" inputmode="numeric"/>
+          <div id="nameDisplay"></div>
+        </div>
+        <div style="margin-bottom:var(--gap-lg)">
+          <label class="mc-label">หมายเลขบัตร (1–8)</label>
+          <input type="number" id="iCard" class="mc-input" min="1" max="8" placeholder="1–8"/>
+        </div>
+        <button class="mc-btn green" onclick="startQ()">⚡ ดูโจทย์!</button>
+      </div>
+      <div class="id-ref-panel">
+        <div class="id-ref-title">รายชื่อนักเรียน (กดเพื่อกรอก ID)</div>
+        <div class="id-ref-grid" id="idRefGrid"></div>
+      </div>
+    </div>
+  </div>
+  <div id="qShow" style="display:none">
+    <div id="qVisual"></div>
+    <div id="qBtns"></div>
+    <div id="qResult"></div>
+    <div id="qNext" style="display:none;margin-top:var(--gap-md)">
+      <button class="mc-btn gold" onclick="resetQ()">🔄 คนต่อไป / ทำใหม่</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- BOARD -->
+<div id="sBoard" class="screen">
+<div class="content">
+  <div class="grass-bar"></div>
+  <div class="mc-panel">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--gap-md);flex-wrap:wrap;gap:8px">
+      <div class="sec-title" style="margin-bottom:0">🏆 สกอร์บอร์ด</div>
+      <button class="mc-btn red" style="width:auto;padding:clamp(6px,1vw,14px) clamp(12px,1.5vw,22px);font-size:var(--fs-sm)" onclick="clearAll()">🗑 ล้างข้อมูล</button>
+    </div>
+    <div id="bList"><div style="color:#555;font-size:var(--fs-sm)">ยังไม่มีผู้ตอบ</div></div>
+  </div>
+  <div class="mc-panel wood">
+    <div class="sec-title">สรุปตามบัตร</div>
+    <div id="bCardSum"><div style="color:#555;font-size:var(--fs-sm)">ยังไม่มีข้อมูล</div></div>
+  </div>
+</div>
+</div>
+
+<!-- REPORT -->
+<div id="sReport" class="screen">
+<div class="content">
+  <div class="grass-bar"></div>
+  <div class="mc-panel">
+    <div class="sec-title">📋 รายงานผล</div>
+    <button class="mc-btn green" onclick="genRep()" style="margin-bottom:var(--gap-sm)">สร้าง CSV</button>
+    <button class="mc-btn blue" onclick="copyRep()">คัดลอกข้อมูล</button>
+    <div id="repArea" class="export-area" style="display:none"></div>
+  </div>
+</div>
+</div>
+
+<script>
+const STUDENTS={175:{name:"กันต์ฤทัย ลีลาชัย",cls:"6/4",num:1},176:{name:"สุภิชัย สถิตย์วิมล",cls:"6/4",num:2},177:{name:"เอกวัฒน์ ศรีบุตรดี",cls:"6/4",num:3},178:{name:"ณัฐธิดา ประพาศพงษ์",cls:"6/4",num:4},179:{name:"นัชชา บุริเศษ",cls:"6/4",num:5},180:{name:"ศศิวรรณ์ พิมพ์ภูคำ",cls:"6/4",num:6},181:{name:"วรางคณา วงค์พระครู",cls:"6/4",num:7},182:{name:"ศิริกัลยา สดใส",cls:"6/4",num:8},183:{name:"วัฒนา เงินกลม",cls:"6/4",num:9},184:{name:"อรอรินทร์ จันดา",cls:"6/4",num:10},185:{name:"ภูผา คำสงค์",cls:"6/4",num:11},186:{name:"พิพัฒน์ คำชมภู",cls:"6/4",num:12},187:{name:"ชินริว คึ้มยะราช",cls:"6/4",num:13},188:{name:"สรยุทธ วงค์สีดา",cls:"6/4",num:14},189:{name:"ลักษิกา สายทอง",cls:"6/4",num:15},190:{name:"กรรฑิมา คึมยะราช",cls:"6/4",num:16},191:{name:"กันต์ธร อินทอง",cls:"6/4",num:17},192:{name:"จันท์จิรา แก้วคำภา",cls:"6/4",num:18},193:{name:"ฐาปณี โทขนาด",cls:"6/4",num:19},194:{name:"มัสยา ขันเพียแก้ว",cls:"6/4",num:20},195:{name:"รัชนีกร หลาบโพธิ์",cls:"6/4",num:21},196:{name:"ศิริพร กอเนาว์รี",cls:"6/4",num:22},197:{name:"อินยุภา บุญเทา",cls:"6/4",num:23},198:{name:"อุไลวรรณ เที่ยวไทย",cls:"6/4",num:24},199:{name:"ศศิตา โถแก้วเขียว",cls:"6/4",num:25},200:{name:"ปิยธิดา ถิตย์เจือ",cls:"6/4",num:26},201:{name:"นิภาพร สุพรรจิตร",cls:"6/4",num:27},202:{name:"เทวฤทธิ์ อุปพงษ์",cls:"6/2",num:1},203:{name:"จิรัฐกิตติ์ ตระกูลศรสูรย์",cls:"6/2",num:2},204:{name:"ไกรวิชญ์ กองโพธิ์ชัย",cls:"6/2",num:3},205:{name:"กิตติยาภรณ์ รังษี",cls:"6/2",num:4},206:{name:"วรกานต์ คำสงค์",cls:"6/2",num:5},207:{name:"ศุภาพิชญ์ พวงมาลา",cls:"6/2",num:6},208:{name:"สุพรรณษา สุขแสน",cls:"6/2",num:7},209:{name:"ฉัตรนรินทร์ พงษ์ศิริ",cls:"6/2",num:8},210:{name:"ธนารัตน์ ตันมูล",cls:"6/2",num:9},211:{name:"กรวิทย์ บุญลคร",cls:"6/2",num:10},212:{name:"สุลลิตา หอมคุณ",cls:"6/2",num:11},213:{name:"กิตติยา ดีทะเล",cls:"6/2",num:12},214:{name:"สิทธิพันธ์ สามารถ",cls:"6/2",num:14},215:{name:"ชนวีร์ ลีทนทา",cls:"6/2",num:15},216:{name:"สุภเวช วิดีสา",cls:"6/2",num:16},217:{name:"กานต์ธีรา รถสพงศ์",cls:"6/2",num:17},218:{name:"ธิดารัตน์ แก้วมะ",cls:"6/2",num:18},219:{name:"ลีลาวดี แจ่มสะอาด",cls:"6/2",num:19},220:{name:"ปรีณาภา วานานวงศ์",cls:"6/2",num:20},221:{name:"กรกนก สร้อยมาลัย",cls:"6/2",num:21},222:{name:"รุ่งนภา ศรีสุข",cls:"6/2",num:22},223:{name:"อุษณีย์ กัลยาบาล",cls:"6/2",num:23},224:{name:"ปาริชาติ จันทรังษี",cls:"6/2",num:24},225:{name:"ณัฐภูมิ นามสีฐาน",cls:"6/2",num:25},226:{name:"กรวิก ฮมผาราช",cls:"6/2",num:26},227:{name:"กฤติมา แง่ธรรม",cls:"6/2",num:27},228:{name:"พิมชนก ศรีทิน",cls:"6/2",num:28},229:{name:"ภัณทิรา ปันนิตามัย",cls:"6/2",num:29},230:{name:"เพ็ญพิมพ์ จันทร์มุงคุณ",cls:"6/SM",num:1},231:{name:"ศุภาพิชญ์ วัฒนสุระ",cls:"6/SM",num:2},232:{name:"ทัศศิกา ระดาใส",cls:"6/SM",num:3},233:{name:"พิพัฒณ์พงค์ ใจปักษ์",cls:"6/SM",num:4},234:{name:"กฤษณะ วงศ์กาฬสินธุ์",cls:"6/SM",num:5},235:{name:"กัลยาณี ศรีแก้ว",cls:"6/SM",num:6},236:{name:"ธิติมา ปัญญาประชุม",cls:"6/SM",num:7},237:{name:"ธวัลรัตน์ หล่าชาญ",cls:"6/SM",num:8},238:{name:"กิรติกาล สวาทพงษ์",cls:"6/SM",num:9},239:{name:"วิภาดา ห้าวหาญ",cls:"6/SM",num:10},240:{name:"อัจฉริยา พรมภาพ",cls:"6/SM",num:11},241:{name:"กฤตพจน์ ถึงนามลี",cls:"6/SM",num:12},242:{name:"สมฤทัย สุวรรณดี",cls:"6/SM",num:13},243:{name:"ปวเรศ คำสงค์",cls:"6/SM",num:14},244:{name:"สุนิสา เพ็ญคำ",cls:"6/SM",num:15},245:{name:"ศิรินภา ศรีพรม",cls:"6/SM",num:16},246:{name:"พิชญา ไชยสมภา",cls:"6/SM",num:17},247:{name:"ลักษิกา เพชรแก้ว",cls:"6/SM",num:18},248:{name:"อัมภาพร สังอ่อนดี",cls:"6/SM",num:19},249:{name:"ศิริรัตน์ โอฐละออ",cls:"6/SM",num:20},250:{name:"พิชยา ขาวประภา",cls:"6/SM",num:21},251:{name:"อรปรียา พรหมสวัสดิ์",cls:"6/SM",num:22},252:{name:"วันชนะศึก เกษวิทย์",cls:"6/SM",num:23},253:{name:"กนกพร นิลโคตร",cls:"6/SM",num:24},254:{name:"กวินธิดา เพชรธเนศวงษ์",cls:"6/SM",num:25},255:{name:"กันติชา วิดีสา",cls:"6/SM",num:26},256:{name:"ดารินทร์ ขันธิวัตร",cls:"6/SM",num:27},257:{name:"ลคณาวดี รัตนพันธ์",cls:"6/SM",num:28},258:{name:"วิภารัตน์ พลวงษ์ษา",cls:"6/SM",num:29},259:{name:"วิภาวดี พรมเมือง",cls:"6/SM",num:30}};
+const QD={1:{charge:'+',vArr:'→',bType:'dot',bLbl:'ออกจากหน้า',ans:'↓',rule:'ประจุบวก → กฎมือขวา',sp:false},2:{charge:'+',vArr:'↑',bType:'cross',bLbl:'เข้าหน้า',ans:'←',rule:'ประจุบวก → กฎมือขวา',sp:false},3:{charge:'−',vArr:'→',bType:'dot',bLbl:'ออกจากหน้า',ans:'↑',rule:'ประจุลบ → ตรงข้ามกฎมือขวา',sp:false},4:{charge:'−',vArr:'↓',bType:'cross',bLbl:'เข้าหน้า',ans:'←',rule:'ประจุลบ → ตรงข้ามกฎมือขวา',sp:false},5:{charge:'+',vArr:'↑',bType:'dot',bLbl:'ออกจากหน้า',ans:'→',rule:'ประจุบวก → กฎมือขวา',sp:false},6:{charge:'−',vArr:'←',bType:'cross',bLbl:'เข้าหน้า',ans:'↑',rule:'ประจุลบ → ตรงข้ามกฎมือขวา',sp:false},7:{charge:'+',vArr:'→',bType:'inline',bLbl:'→',bInline:'B',ans:'ศูนย์',rule:'v ขนานกับ B → F = 0',sp:true,note:'B ไปในทิศเดียวกับ v'},8:{charge:'−',vArr:'↑',bType:'inline',bLbl:'↑',bInline:'B',ans:'ศูนย์',rule:'v ขนานกับ B → F = 0',sp:true,note:'B ไปในทิศเดียวกับ v'}};
+let scores=[],curId=0,curCard=0,answered=false,shuffledDirs=[];
+function buildIdRef(){const g={};Object.entries(STUDENTS).forEach(([id,s])=>{if(!g[s.cls])g[s.cls]=[];g[s.cls].push({id:+id,name:s.name,num:s.num})});let h='';['6/SM','6/2','6/4'].forEach(cls=>{if(!g[cls])return;h+=`<div class="id-ref-cls">ห้อง ${cls}</div>`;g[cls].sort((a,b)=>a.num-b.num).forEach(s=>{h+=`<div class="id-ref-item" onclick="pickId(${s.id})"><span>${s.id}</span> ${s.name}</div>`})});document.getElementById('idRefGrid').innerHTML=h}
+function pickId(id){document.getElementById('iId').value=id;lookupName()}
+function lookupName(){const id=parseInt(document.getElementById('iId').value),el=document.getElementById('nameDisplay');if(STUDENTS[id]){el.textContent='✓ '+STUDENTS[id].name+' · ห้อง '+STUDENTS[id].cls;el.style.color='#90FF70'}else if(id){el.textContent='✗ ไม่พบ ID นี้';el.style.color='#FF9090'}else el.textContent=''}
+function goS(n){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('s'+n).classList.add('active');document.querySelectorAll('.mc-nav-btn').forEach(b=>b.classList.remove('active'));const idx={Home:0,Quiz:1,Board:2,Report:3}[n];document.querySelectorAll('.mc-nav-btn')[idx].classList.add('active');if(n==='Board')renderBoard();if(n==='Home')updStats()}
+function fGrid(t){let h='<div class="field-grid">';for(let i=0;i<9;i++)h+=t==='dot'?`<div class="field-cell field-dot">•</div>`:`<div class="field-cell field-cross">✕</div>`;return h+'</div>'}
+function buildCard(cn,sid){const q=QD[cn],stu=STUDENTS[sid]||{},isPos=q.charge==='+';let scene='';if(q.sp){scene=`<div class="physics-scene"><div class="arrow-col"><div style="font-size:var(--fs-xs);color:#AAA;text-shadow:1px 1px 0 #000">ประจุ ${q.charge}</div><div class="charge-block ${isPos?'charge-pos':'charge-neg'}">${q.charge}</div></div><div class="arrow-col"><div class="arrow-lbl">v</div><div class="arrow-sym">${q.vArr}</div></div><div class="arrow-col"><div class="arrow-lbl">${q.bInline}</div><div class="arrow-sym">${q.bLbl}</div></div><div class="f-box">F=?</div></div><div class="special-note">${q.note}</div>`}else{scene=`<div class="physics-scene"><div class="arrow-col"><div style="font-size:var(--fs-xs);color:#AAA;text-shadow:1px 1px 0 #000">ประจุ ${q.charge}</div><div class="charge-block ${isPos?'charge-pos':'charge-neg'}">${q.charge}</div></div><div class="arrow-col"><div class="arrow-lbl">v</div><div class="arrow-sym">${q.vArr}</div></div><div class="field-wrap"><div class="arrow-lbl">B</div>${fGrid(q.bType)}<div class="field-lbl">${q.bLbl}</div></div><div class="f-box">F=?</div></div>`}const stuLabel=stu.name?`${stu.name} · ${stu.cls}`:`ID: ${sid}`;return`<div class="quiz-visual"><div class="quiz-hdr"><div style="display:flex;align-items:center;gap:var(--gap-sm)"><div class="card-num">${cn}</div><div class="lbl-tag blue">โจทย์</div></div><div class="id-tag">${stuLabel}</div></div>${scene}<div class="q-text">⚡ แรงแม่เหล็ก F มีทิศทางใด?</div></div>`}
+function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function buildBtns(cn){shuffledDirs=shuffle(['↑','↓','←','→']);let h=`<div class="shuffle-note">🔀 ตำแหน่งปุ่มสุ่มใหม่ทุกครั้ง</div><div class="dir-grid">`;shuffledDirs.forEach(d=>{h+=`<button class="dir-btn" id="db_${d}" onclick="checkAns('${d}',${cn})">${d}</button>`});h+=`</div><button class="dir-btn dir-zero mc-btn" id="db_ศูนย์" onclick="checkAns('ศูนย์',${cn})">ศูนย์ (F = 0)</button>`;return h}
+function checkAns(chosen,cn){if(answered)return;answered=true;const q=QD[cn],stu=STUDENTS[curId]||{},correct=chosen===q.ans;scores.push({id:curId,name:stu.name||String(curId),cls:stu.cls||'',card:cn,chosen,ans:q.ans,correct,time:new Date().toLocaleTimeString('th-TH')});[...shuffledDirs,'ศูนย์'].forEach(d=>{const b=document.getElementById('db_'+d);if(!b)return;b.disabled=true;if(d===q.ans)b.classList.add('ok');else if(d===chosen&&!correct)b.classList.add('no')});document.getElementById('qResult').innerHTML=`<div class="result-bar ${correct?'result-ok':'result-no'}"><div class="result-icon">${correct?'✅':'❌'}</div><div><div class="result-title" style="color:${correct?'var(--mc-em)':'var(--mc-red)'}">${correct?'ถูกต้อง! +1 ❤️':'ไม่ถูกต้อง 💀'}</div><div class="result-sub">เฉลย: ${q.ans} &nbsp;|&nbsp; ${q.rule}</div></div></div>`;document.getElementById('qNext').style.display='block';updStats()}
+function startQ(){const sid=parseInt(document.getElementById('iId').value),cn=parseInt(document.getElementById('iCard').value);if(!sid){alert('กรุณากรอกรหัสนักเรียน');return}if(!cn||cn<1||cn>8){alert('กรุณากรอกหมายเลขบัตร 1–8');return}if(!STUDENTS[sid]&&!confirm('ไม่พบ ID '+sid+' ดำเนินการต่อ?'))return;curId=sid;curCard=cn;answered=false;document.getElementById('qInput').style.display='none';document.getElementById('qShow').style.display='block';document.getElementById('qVisual').innerHTML=buildCard(cn,sid);document.getElementById('qBtns').innerHTML=buildBtns(cn);document.getElementById('qResult').innerHTML='';document.getElementById('qNext').style.display='none'}
+function resetQ(){document.getElementById('qInput').style.display='block';document.getElementById('qShow').style.display='none';document.getElementById('iId').value='';document.getElementById('iCard').value='';document.getElementById('nameDisplay').textContent='';answered=false}
+function updStats(){document.getElementById('stT').textContent=scores.length;document.getElementById('stC').textContent=scores.filter(s=>s.correct).length}
+function renderBoard(){const bl=document.getElementById('bList');if(!scores.length){bl.innerHTML='<div style="color:#555;font-size:var(--fs-sm)">ยังไม่มีผู้ตอบ</div>';document.getElementById('bCardSum').innerHTML='<div style="color:#555;font-size:var(--fs-sm)">ยังไม่มีข้อมูล</div>';return}bl.innerHTML=scores.map((s,i)=>`<div class="sb-row"><div class="sb-idx">#${i+1}</div><div class="sb-card">${s.card}</div><div style="flex:1;min-width:0"><div class="sb-name">${s.name||s.id}</div><div class="sb-sub">${s.cls} · ${s.time}</div></div><div style="font-size:clamp(14px,2vw,24px);text-shadow:2px 2px 0 #000;margin-right:6px">${s.ans}</div><div class="sb-badge ${s.correct?'sb-ok':'sb-no'}">${s.correct?'✓ ถูก':'✗ ผิด'}</div></div>`).join('');const byC={};scores.forEach(s=>{if(!byC[s.card])byC[s.card]={t:0,c:0};byC[s.card].t++;if(s.correct)byC[s.card].c++});document.getElementById('bCardSum').innerHTML=Object.keys(byC).sort((a,b)=>+a-+b).map(c=>`<div style="display:flex;align-items:center;gap:var(--gap-sm);padding:clamp(6px,1vw,14px) 0;border-bottom:1px solid #2A2A2A"><div class="sb-card">${c}</div><div style="flex:1;font-size:var(--fs-sm)">${byC[c].t} คน</div><div style="font-size:var(--fs-md);font-weight:700;color:var(--mc-em);text-shadow:1px 1px 0 #000">${byC[c].c}/${byC[c].t} ถูก</div></div>`).join('')}
+function clearAll(){if(confirm('ล้างข้อมูลทั้งหมด?')){scores=[];renderBoard();updStats()}}
+function genRep(){if(!scores.length){alert('ยังไม่มีข้อมูล');return}const h='รหัส,ชื่อ,ห้อง,บัตร,เลือก,เฉลย,ผล,เวลา',rows=scores.map(s=>`${s.id},${s.name},${s.cls},${s.card},${s.chosen},${s.ans},${s.correct?'ถูก':'ผิด'},${s.time}`),ra=document.getElementById('repArea');ra.textContent=[h,...rows].join('\n');ra.style.display='block'}
+function copyRep(){const ra=document.getElementById('repArea');if(!ra.textContent)genRep();navigator.clipboard.writeText(ra.textContent).then(()=>alert('คัดลอกแล้ว!')).catch(()=>alert('กรุณาเลือกข้อความเอง'))}
+document.getElementById('iId').addEventListener('input',lookupName);
+buildIdRef();
+</script>
+</body>
+</html>
