@@ -1,690 +1,198 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="utf-8">
+<meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>แผนที่เยี่ยมบ้านนักเรียน ม.6/2 พร้อมเช็กบ้านที่ไปแล้ว</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<title>แผนที่เยี่ยมบ้านนักเรียน ม.6/2</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <style>
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Tahoma, sans-serif;
-    background: #f8fafc;
-    color: #0f172a;
-  }
-  .layout {
-    display: grid;
-    grid-template-columns: 420px 1fr;
-    height: 100vh;
-    width: 100vw;
-  }
-  .sidebar {
-    overflow-y: auto;
-    border-right: 1px solid #e2e8f0;
-    background: #ffffff;
-    padding: 18px;
-  }
-  #map { height: 100vh; width: 100%; }
-  h1 {
-    margin: 0 0 4px 0;
-    font-size: 22px;
-    line-height: 1.25;
-  }
-  .subtitle {
-    margin: 0 0 14px 0;
-    color: #475569;
-    font-size: 13px;
-    line-height: 1.5;
-  }
-  .top-actions {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin: 12px 0 16px;
-  }
-  button, .gmap-btn, .focus-btn {
-    border: 0;
-    border-radius: 12px;
-    padding: 9px 12px;
-    font-weight: 700;
-    cursor: pointer;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 13px;
-  }
-  .show-all {
-    background: #0f172a;
-    color: #fff;
-  }
-  .gmap-btn {
-    background: #16a34a;
-    color: #fff;
-  }
-  .focus-btn {
-    background: #e2e8f0;
-    color: #0f172a;
-  }
-  .button-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin: 10px 0 12px;
-  }
-  .day-card {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 18px;
-    padding: 14px;
-    margin-bottom: 14px;
-    box-shadow: 0 6px 20px rgba(15, 23, 42, 0.05);
-  }
-  .day-head h2 {
-    margin: 0;
-    font-size: 17px;
-  }
-  .day-head p {
-    margin: 4px 0 0 0;
-    font-size: 13px;
-    color: #64748b;
-  }
-  .student-list {
-    display: flex;
-    flex-direction: column;
-    gap: 9px;
-  }
-  .student-row {
-    display: grid;
-    grid-template-columns: 34px 1fr 74px;
-    gap: 9px;
-    align-items: start;
-    padding: 8px;
-    background: #f8fafc;
-    border-radius: 12px;
-  }
-  .badge {
-    width: 28px;
-    height: 28px;
-    color: white;
-    border-radius: 999px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 800;
-    font-size: 13px;
-    box-shadow: 0 2px 6px rgba(0,0,0,.16);
-  }
-  .student-name { font-weight: 700; font-size: 13.5px; }
-  .coord { color: #64748b; font-size: 12px; margin-top: 2px; }
-  .warning-box, .danger-box {
-    padding: 12px;
-    border-radius: 14px;
-    margin: 12px 0;
-    font-size: 13px;
-  }
-  .warning-box {
-    background: #fffbeb;
-    border: 1px solid #fde68a;
-  }
-  .danger-box {
-    background: #fef2f2;
-    border: 1px solid #fecaca;
-  }
-  .warning-box summary, .danger-box summary { font-weight: 800; cursor: pointer; }
-  .warning-box ul, .danger-box ul {
-    margin: 8px 0 0 18px;
-    padding: 0;
-  }
-
-  .visit-check {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    font-size: 12px;
-    font-weight: 800;
-    color: #0f172a;
-    cursor: pointer;
-    user-select: none;
-    align-self: center;
-    padding: 5px 6px;
-    border-radius: 10px;
-    background: #e2e8f0;
-  }
-  .visit-check input {
-    width: 18px;
-    height: 18px;
-    accent-color: #16a34a;
-    cursor: pointer;
-  }
-  .student-row.visited {
-    background: #ecfdf5;
-    border: 1px solid #bbf7d0;
-  }
-  .student-row.visited .student-name {
-    color: #64748b;
-    text-decoration: line-through;
-  }
-  .student-row.visited .badge {
-    opacity: .55;
-  }
-  .progress-line, .status-summary {
-    background: #f1f5f9;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 8px 10px;
-    font-size: 13px;
-    color: #334155;
-    margin: 8px 0 12px;
-  }
-  .reset-btn {
-    background: #fee2e2;
-    color: #991b1b;
-  }
-  .export-btn {
-    background: #dbeafe;
-    color: #1e3a8a;
-  }
-  .num-marker.visited-marker {
-    background: #64748b !important;
-    font-size: 16px;
-  }
-
-  .leaflet-div-icon {
-    background: transparent;
-    border: none;
-  }
-  .num-marker {
-    width: 30px;
-    height: 30px;
-    border-radius: 999px;
-    color: #fff;
-    border: 3px solid #fff;
-    box-shadow: 0 2px 8px rgba(0,0,0,.25);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 13px;
-    font-weight: 900;
-  }
-  .legend {
-    position: absolute;
-    right: 12px;
-    bottom: 24px;
-    z-index: 1000;
-    background: white;
-    padding: 10px 12px;
-    border-radius: 14px;
-    box-shadow: 0 4px 18px rgba(0,0,0,.18);
-    font-size: 13px;
-    line-height: 1.8;
-  }
-  .legend-dot {
-    display: inline-block;
-    width: 12px;
-    height: 12px;
-    border-radius: 999px;
-    margin-right: 6px;
-    vertical-align: middle;
-  }
-  @media (max-width: 850px) {
-    .layout {
-      grid-template-columns: 1fr;
-      grid-template-rows: 42vh 58vh;
-    }
-    .sidebar {
-      grid-row: 2;
-      border-right: 0;
-      border-top: 1px solid #e2e8f0;
-    }
-    #map {
-      grid-row: 1;
-      height: 42vh;
-    }
-  }
+  :root { --teal:#0f766e; --blue:#2563eb; --orange:#f97316; --gray:#64748b; --bg:#f8fafc; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Tahoma,sans-serif; background:var(--bg); color:#0f172a; }
+  .app { display:grid; grid-template-columns: 420px 1fr; min-height:100vh; }
+  .sidebar { background:white; border-right:1px solid #e2e8f0; overflow:auto; max-height:100vh; padding:16px; }
+  #map { height:100vh; width:100%; }
+  h1 { font-size:20px; margin:0 0 6px; color:#0f766e; }
+  .subtitle { font-size:13px; color:#475569; margin-bottom:12px; }
+  .stats { display:grid; grid-template-columns: repeat(2,1fr); gap:8px; margin:10px 0 14px; }
+  .stat { background:#f1f5f9; border-radius:12px; padding:10px; }
+  .stat b { display:block; font-size:20px; color:#0f766e; }
+  .toolbar { display:flex; gap:8px; flex-wrap:wrap; margin:10px 0 14px; }
+  button, .btn { border:0; border-radius:10px; padding:9px 12px; cursor:pointer; text-decoration:none; font-weight:700; display:inline-block; font-size:13px; }
+  .btn-primary { background:#0f766e; color:white; }
+  .btn-blue { background:#2563eb; color:white; }
+  .btn-light { background:#e2e8f0; color:#0f172a; }
+  .day { border:1px solid #e2e8f0; border-radius:16px; margin:14px 0; overflow:hidden; background:#fff; }
+  .day-header { padding:12px; background:#f8fafc; border-bottom:1px solid #e2e8f0; }
+  .day-header h2 { font-size:16px; margin:0 0 4px; }
+  .day-meta { font-size:12px; color:#475569; }
+  .progress-line { margin-top:8px; height:8px; background:#e2e8f0; border-radius:999px; overflow:hidden; }
+  .progress-bar { height:8px; width:0%; background:#22c55e; }
+  .student { display:grid; grid-template-columns:28px 1fr; gap:8px; padding:10px 12px; border-bottom:1px dashed #e2e8f0; align-items:start; }
+  .student:last-child { border-bottom:0; }
+  .student.done { background:#ecfdf5; color:#64748b; }
+  .student.done .name { text-decoration: line-through; }
+  .seq { font-weight:800; color:#0f766e; }
+  .name { font-weight:700; font-size:14px; }
+  .detail { color:#475569; font-size:12px; line-height:1.45; }
+  .student input { width:20px; height:20px; }
+  .issue { background:#fff7ed; border:1px solid #fed7aa; border-radius:12px; padding:10px; margin:10px 0; font-size:13px; }
+  .issue h3 { margin:0 0 6px; color:#9a3412; font-size:15px; }
+  .legend { display:flex; gap:8px; flex-wrap:wrap; font-size:12px; color:#475569; margin:8px 0; }
+  .legend span { background:#f1f5f9; border-radius:999px; padding:4px 8px; }
+  .number-marker { width:28px; height:28px; border-radius:50%; background:#2563eb; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:800; border:3px solid #fff; box-shadow:0 2px 8px rgba(0,0,0,.35); }
+  .number-marker.done { background:#16a34a; }
+  .number-marker.east { background:#ea580c; }
+  .number-marker.west { background:#0f766e; }
+  .number-marker.central { background:#2563eb; }
+  .small { font-size:12px; color:#64748b; }
+  @media (max-width: 860px) { .app { grid-template-columns:1fr; } .sidebar { max-height:none; } #map { height:65vh; } }
 </style>
 </head>
 <body>
-<div class="layout">
+<div class="app">
   <aside class="sidebar">
     <h1>แผนที่เยี่ยมบ้านนักเรียน ม.6/2</h1>
-    <p class="subtitle">
-      อัปเดตจากไฟล์ล่าสุด · จัดกลุ่มตามพื้นที่จริง 3 โซน · หมุดบนแผนที่แสดงเฉพาะลำดับ ไม่แสดงชื่อนักเรียนทับบนแผนที่<br>
-      หมายเหตุ: ยังไม่มีจุดเริ่มต้นของทุกวัน จึงทำลิงก์นำทางโดยเริ่มจากบ้านลำดับที่ 1 ของแต่ละวัน<br>เพิ่มเติม: ติ๊กช่อง “ไปแล้ว” เพื่อเช็กบ้านที่เยี่ยมแล้ว ระบบจะจำสถานะไว้ในเครื่องที่เปิดไฟล์นี้
-    </p>
-    <div class="top-actions">
-      <button class="show-all" onclick="showAll()">แสดงทุกวัน</button>
-      <button class="reset-btn" onclick="resetAllVisits()">ล้างการติ๊กทั้งหมด</button>
-      <button class="export-btn" onclick="downloadVisitStatus()">ดาวน์โหลดสถานะ CSV</button>
+    <div class="subtitle">เวอร์ชันอัปเดตจากไฟล์ใหม่ • ไม่เริ่มจากโรงเรียน • ติ๊กบ้านที่ไปแล้วได้</div>
+    <div class="stats">
+      <div class="stat"><span>จัดลงแผนที่</span><b>27</b><span>คน</span></div>
+      <div class="stat"><span>ทั้งหมดในไฟล์</span><b>28</b><span>คน</span></div>
+      <div class="stat"><span>ยังไม่ไป</span><b id="remainCount">-</b><span>บ้าน</span></div>
+      <div class="stat"><span>ไปแล้ว</span><b id="doneCount">-</b><span>บ้าน</span></div>
     </div>
-    <div class="status-summary" id="overall-progress">สถานะรวม: ยังไม่ได้เช็ก</div>
-    
-    <details class="warning-box" open>
-      <summary>ยังไม่มีพิกัด 9 คน</summary>
-      <ul><li>แถว 2: นาย เทวฤทธิ์ อุปพงษ์</li><li>แถว 7: นางสาว ศุภาพิชญ์ พวงมาลา</li><li>แถว 8: นางสาว สุพรรณษา สุขแสน</li><li>แถว 9: นาย ฉัตรนรินทร์ พงษ์ศิริ</li><li>แถว 10: นาย ธนารัตน์ ตันมูล</li><li>แถว 11: นาย กรวิทย์ บุญลคร</li><li>แถว 13: นางสาว กิตติยา ดีทะเล</li><li>แถว 18: นางสาว ธิดารัตน์ แก้วมะ</li><li>แถว 19: นางสาว ลีลาวดี แจ่มสะอาด</li></ul>
-    </details>
-    
-    
-    <section class="day-card" id="card-วัน 1">
-      <div class="day-head">
-        <div>
-          <h2>วัน 1 · โซนตะวันตก/ใต้</h2>
-          <p>8 คน · ระยะเส้นตรงประมาณ 31.20 กม.</p>
-        </div>
-      </div>
-      <div class="button-row">
-        <a class="gmap-btn" href="https://www.google.com/maps/dir/?api=1&amp;origin=17.0903844137651,104.064945070618&amp;destination=16.9749059062875,104.128509587986&amp;travelmode=driving&amp;waypoints=17.1162984791717,104.078532906417|17.0918724615872,104.107586244119|17.0477769724327,104.098473769186|17.0534692286889,104.134455128834|17.0647265175799,104.151827057663|16.99716361943,104.169482928836" target="_blank" rel="noopener">เปิดนำทาง Google Maps</a>
-        <button onclick="focusDay('วัน 1')" class="focus-btn">ดูเฉพาะวันนี้</button>
-      </div>
-      <div class="student-list">
-        
-        <div class="student-row">
-          <div class="badge" style="background:#0ea5e9;">1</div>
-          <div>
-            <div class="student-name">นางสาว สุลลิตา หอมคุณ</div>
-            <div class="coord">17.090384, 104.064945</div>
-          </div>
-        </div>
-        <div class="student-row">
-          <div class="badge" style="background:#0ea5e9;">2</div>
-          <div>
-            <div class="student-name">นาย สิทธิพันธ์ สามารถ</div>
-            <div class="coord">17.116298, 104.078533</div>
-          </div>
-        </div>
-        <div class="student-row">
-          <div class="badge" style="background:#0ea5e9;">3</div>
-          <div>
-            <div class="student-name">นาย ชนวีร์ ลีทนทา</div>
-            <div class="coord">17.091872, 104.107586</div>
-          </div>
-        </div>
-        <div class="student-row">
-          <div class="badge" style="background:#0ea5e9;">4</div>
-          <div>
-            <div class="student-name">นาย จิรัฐกิตติ์ ตระกูลศรสูรย์</div>
-            <div class="coord">17.047777, 104.098474</div>
-          </div>
-        </div>
-        <div class="student-row">
-          <div class="badge" style="background:#0ea5e9;">5</div>
-          <div>
-            <div class="student-name">นางสาว กฤติมา แง่ธรรม</div>
-            <div class="coord">17.053469, 104.134455</div>
-          </div>
-        </div>
-        <div class="student-row">
-          <div class="badge" style="background:#0ea5e9;">6</div>
-          <div>
-            <div class="student-name">นางสาว ปรีณาภา วานานวงศ์</div>
-            <div class="coord">17.064727, 104.151827</div>
-          </div>
-        </div>
-        <div class="student-row">
-          <div class="badge" style="background:#0ea5e9;">7</div>
-          <div>
-            <div class="student-name">นาย สุภเวช วิดีสา</div>
-            <div class="coord">16.997164, 104.169483</div>
-          </div>
-        </div>
-        <div class="student-row">
-          <div class="badge" style="background:#0ea5e9;">8</div>
-          <div>
-            <div class="student-name">นางสาว พิมชนก ศรีทิน</div>
-            <div class="coord">16.974906, 104.128510</div>
-          </div>
-        </div>
-      </div>
-    </section>
-    <section class="day-card" id="card-วัน 2">
-      <div class="day-head">
-        <div>
-          <h2>วัน 2 · โซนกลาง/เหนือ</h2>
-          <p>8 คน · ระยะเส้นตรงประมาณ 17.23 กม.</p>
-        </div>
-      </div>
-      <div class="button-row">
-        <a class="gmap-btn" href="https://www.google.com/maps/dir/?api=1&amp;origin=17.0991738908214,104.153555600005&amp;destination=17.188330550992,104.09554814233&amp;travelmode=driving&amp;waypoints=17.119979493108,104.167871828834|17.1309516943201,104.155149628835|17.1483956056645,104.144519960918|17.1471632351234,104.133777799999|17.158912,104.13775|17.1658680017201,104.150289321167" target="_blank" rel="noopener">เปิดนำทาง Google Maps</a>
-        <button onclick="focusDay('วัน 2')" class="focus-btn">ดูเฉพาะวันนี้</button>
-      </div>
-      <div class="student-list">
-        
-        <div class="student-row">
-          <div class="badge" style="background:#22c55e;">1</div>
-          <div>
-            <div class="student-name">นางสาว วรกานต์ คำสงค์</div>
-            <div class="coord">17.099174, 104.153556</div>
-          </div>
-        </div>
-        <div class="student-row">
-          <div class="badge" style="background:#22c55e;">2</div>
-          <div>
-            <div class="student-name">นางสาว กรกนก สร้อยมาลัย</div>
-            <div class="coord">17.119979, 104.167872</div>
-          </div>
-        </div>
-        <div class="student-row">
-          <div class="badge" style="background:#22c55e;">3</div>
-          <div>
-            <div class="student-name">นางสาว รุ่งนภา ศรีสุข</div>
-            <div class="coord">17.130952, 104.155150</div>
-          </div>
-        </div>
-        <div class="student-row">
-          <div class="badge" style="background:#22c55e;">4</div>
-          <div>
-            <div class="student-name">นางสาว อุษณีย์ กัลยาบาล</div>
-            <div class="coord">17.148396, 104.144520</div>
-          </div>
-        </div>
-        <div class="student-row">
-          <div class="badge" style="background:#22c55e;">5</div>
-          <div>
-            <div class="student-name">นางสาว กิตติยาภรณ์ รังษี</div>
-            <div class="coord">17.147163, 104.133778</div>
-          </div>
-        </div>
-        <div class="student-row">
-          <div class="badge" style="background:#22c55e;">6</div>
-          <div>
-            <div class="student-name">นางสาว กานต์ธีรา รถสพงศ์ (กาน)</div>
-            <div class="coord">17.158912, 104.137750</div>
-          </div>
-        </div>
-        <div class="student-row">
-          <div class="badge" style="background:#22c55e;">7</div>
-          <div>
-            <div class="student-name">นาย ณัฐภูมิ นามสีฐาน</div>
-            <div class="coord">17.165868, 104.150289</div>
-          </div>
-        </div>
-        <div class="student-row">
-          <div class="badge" style="background:#22c55e;">8</div>
-          <div>
-            <div class="student-name">นางสาว ภัณทิรา ปันนิตามัย</div>
-            <div class="coord">17.188331, 104.095548</div>
-          </div>
-        </div>
-      </div>
-    </section>
-    <section class="day-card" id="card-วัน 3">
-      <div class="day-head">
-        <div>
-          <h2>วัน 3 · โซนตะวันออก</h2>
-          <p>3 คน · ระยะเส้นตรงประมาณ 6.90 กม.</p>
-        </div>
-      </div>
-      <div class="button-row">
-        <a class="gmap-btn" href="https://www.google.com/maps/dir/?api=1&amp;origin=17.1340839405602,104.281333300258&amp;destination=17.1478786480976,104.236333300006&amp;travelmode=driving&amp;waypoints=17.1189341464927,104.260732928831" target="_blank" rel="noopener">เปิดนำทาง Google Maps</a>
-        <button onclick="focusDay('วัน 3')" class="focus-btn">ดูเฉพาะวันนี้</button>
-      </div>
-      <div class="student-list">
-        
-        <div class="student-row">
-          <div class="badge" style="background:#f97316;">1</div>
-          <div>
-            <div class="student-name">นาย ไกรวิชญ์ กองโพธิ์ชัย</div>
-            <div class="coord">17.134084, 104.281333</div>
-          </div>
-        </div>
-        <div class="student-row">
-          <div class="badge" style="background:#f97316;">2</div>
-          <div>
-            <div class="student-name">นางสาว ปาริชาติ จันทรังษี</div>
-            <div class="coord">17.118934, 104.260733</div>
-          </div>
-        </div>
-        <div class="student-row">
-          <div class="badge" style="background:#f97316;">3</div>
-          <div>
-            <div class="student-name">นาย กรวิก ฮมผาราช</div>
-            <div class="coord">17.147879, 104.236333</div>
-          </div>
-        </div>
-      </div>
-    </section>
+    <div class="toolbar">
+      <button class="btn-primary" onclick="downloadStatusCSV()">ดาวน์โหลดสถานะ CSV</button>
+      <button class="btn-light" onclick="clearAllChecks()">ล้างการติ๊กทั้งหมด</button>
+    </div>
+    <div class="legend"><span>✓ = ไปแล้ว</span><span>เลขหมุด = ลำดับเยี่ยม</span><span>เส้น = ลำดับที่แนะนำ</span></div>
+    <div id="warnings"></div>
+    <div id="days"></div>
   </aside>
   <main id="map"></main>
 </div>
-
-<div class="legend" id="legend"></div>
-
 <script>
-const routes = {"วัน 1": {"zone": "โซนตะวันตก/ใต้", "distance_km": 31.2, "google_link": "https://www.google.com/maps/dir/?api=1&origin=17.0903844137651,104.064945070618&destination=16.9749059062875,104.128509587986&travelmode=driving&waypoints=17.1162984791717,104.078532906417|17.0918724615872,104.107586244119|17.0477769724327,104.098473769186|17.0534692286889,104.134455128834|17.0647265175799,104.151827057663|16.99716361943,104.169482928836", "points": [{"seq": 1, "name": "นางสาว สุลลิตา หอมคุณ", "nick": "", "lat": 17.0903844137651, "lon": 104.064945070618, "share": "https://maps.app.goo.gl/4cd4R5xWtwnkKVTC8"}, {"seq": 2, "name": "นาย สิทธิพันธ์ สามารถ", "nick": "", "lat": 17.1162984791717, "lon": 104.078532906417, "share": "https://maps.app.goo.gl/SUzfR3awDq1DHbxP9"}, {"seq": 3, "name": "นาย ชนวีร์ ลีทนทา", "nick": "", "lat": 17.0918724615872, "lon": 104.107586244119, "share": "https://maps.app.goo.gl/XLrMrU3PP5W6Gavu8"}, {"seq": 4, "name": "นาย จิรัฐกิตติ์ ตระกูลศรสูรย์", "nick": "", "lat": 17.0477769724327, "lon": 104.098473769186, "share": "https://maps.app.goo.gl/pM2XEzKfDVpJwivt9"}, {"seq": 5, "name": "นางสาว กฤติมา แง่ธรรม", "nick": "", "lat": 17.0534692286889, "lon": 104.134455128834, "share": "https://maps.app.goo.gl/CxBv3VTM4XALKTsSA"}, {"seq": 6, "name": "นางสาว ปรีณาภา วานานวงศ์", "nick": "", "lat": 17.0647265175799, "lon": 104.151827057663, "share": "https://maps.app.goo.gl/ca67rKMiAP4Sps888"}, {"seq": 7, "name": "นาย สุภเวช วิดีสา", "nick": "", "lat": 16.99716361943, "lon": 104.169482928836, "share": "https://maps.app.goo.gl/MwZjmw9Zbty8kjvf6"}, {"seq": 8, "name": "นางสาว พิมชนก ศรีทิน", "nick": "", "lat": 16.9749059062875, "lon": 104.128509587986, "share": "https://maps.app.goo.gl/iuQHaUuLZLFR2dQ78"}]}, "วัน 2": {"zone": "โซนกลาง/เหนือ", "distance_km": 17.23, "google_link": "https://www.google.com/maps/dir/?api=1&origin=17.0991738908214,104.153555600005&destination=17.188330550992,104.09554814233&travelmode=driving&waypoints=17.119979493108,104.167871828834|17.1309516943201,104.155149628835|17.1483956056645,104.144519960918|17.1471632351234,104.133777799999|17.158912,104.13775|17.1658680017201,104.150289321167", "points": [{"seq": 1, "name": "นางสาว วรกานต์ คำสงค์", "nick": "", "lat": 17.0991738908214, "lon": 104.153555600005, "share": "https://maps.app.goo.gl/wtBnVmkTzvceV3mM7"}, {"seq": 2, "name": "นางสาว กรกนก สร้อยมาลัย", "nick": "", "lat": 17.119979493108, "lon": 104.167871828834, "share": "https://maps.app.goo.gl/hBL5w3fDVPZPeArs7"}, {"seq": 3, "name": "นางสาว รุ่งนภา ศรีสุข", "nick": "", "lat": 17.1309516943201, "lon": 104.155149628835, "share": "https://maps.app.goo.gl/KMMfgzENmSzVJAscA"}, {"seq": 4, "name": "นางสาว อุษณีย์ กัลยาบาล", "nick": "", "lat": 17.1483956056645, "lon": 104.144519960918, "share": "https://maps.app.goo.gl/3LQ586kF83bk9Gdz7"}, {"seq": 5, "name": "นางสาว กิตติยาภรณ์ รังษี", "nick": "", "lat": 17.1471632351234, "lon": 104.133777799999, "share": "https://maps.app.goo.gl/PUrqF6sYc1kSzTct5"}, {"seq": 6, "name": "นางสาว กานต์ธีรา รถสพงศ์", "nick": "กาน", "lat": 17.158912, "lon": 104.13775, "share": "https://maps.app.goo.gl/1herUxqq31a282bk9"}, {"seq": 7, "name": "นาย ณัฐภูมิ นามสีฐาน", "nick": "", "lat": 17.1658680017201, "lon": 104.150289321167, "share": "https://maps.app.goo.gl/8eCMQZfcJ7g8w7iZA"}, {"seq": 8, "name": "นางสาว ภัณทิรา ปันนิตามัย", "nick": "", "lat": 17.188330550992, "lon": 104.09554814233, "share": "https://maps.app.goo.gl/uiJ98P77PPTaeDV3A?g_st=ac"}]}, "วัน 3": {"zone": "โซนตะวันออก", "distance_km": 6.9, "google_link": "https://www.google.com/maps/dir/?api=1&origin=17.1340839405602,104.281333300258&destination=17.1478786480976,104.236333300006&travelmode=driving&waypoints=17.1189341464927,104.260732928831", "points": [{"seq": 1, "name": "นาย ไกรวิชญ์ กองโพธิ์ชัย", "nick": "", "lat": 17.1340839405602, "lon": 104.281333300258, "share": "https://maps.app.goo.gl/mMyJg4VhN3QtLJD89"}, {"seq": 2, "name": "นางสาว ปาริชาติ จันทรังษี", "nick": "", "lat": 17.1189341464927, "lon": 104.260732928831, "share": "https://maps.app.goo.gl/ADyAetKejsitpmHV8"}, {"seq": 3, "name": "นาย กรวิก ฮมผาราช", "nick": "", "lat": 17.1478786480976, "lon": 104.236333300006, "share": "https://maps.app.goo.gl/3r3W3kqNs38SHKQk6"}]}};
-const dayColors = {"วัน 1": "#0ea5e9", "วัน 2": "#22c55e", "วัน 3": "#f97316", "วัน 4": "#8b5cf6"};
-
-const STORAGE_KEY = "home_visit_6_2_checklist_v1";
-let visitStatus = {};
-try {
-  visitStatus = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
-} catch (err) {
-  visitStatus = {};
-}
-const markerRefs = {};
-
-function pointKey(day, seq) {
-  return `${day}__${seq}`;
-}
-
-function isVisited(day, seq) {
-  const value = visitStatus[pointKey(day, seq)];
-  return value === true || (value && value.visited === true);
-}
-
-function checkedAt(day, seq) {
-  const value = visitStatus[pointKey(day, seq)];
-  if (value && value.checkedAt) return value.checkedAt;
-  return "";
-}
-
-function saveVisitStatus() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(visitStatus));
-}
-
-function makeIcon(day, seq) {
-  const color = dayColors[day] || "#64748b";
-  const visited = isVisited(day, seq);
-  return L.divIcon({
-    className: 'leaflet-div-icon',
-    html: `<div class="num-marker${visited ? ' visited-marker' : ''}" style="background:${visited ? '#64748b' : color}">${visited ? '✓' : seq}</div>`,
-    iconSize: [30, 30],
-    iconAnchor: [15, 15],
-    popupAnchor: [0, -14]
-  });
-}
-
-const map = L.map('map', { scrollWheelZoom: true }).setView([17.1050668, 104.1500355], 12);
-
+const DATA = {"created_note": "แผนที่เยี่ยมบ้านนักเรียน ม.6/2 - เวอร์ชันอัปเดตจากไฟล์ใหม่ มีระบบติ๊กบ้านที่ไปแล้ว", "total": 28, "valid": 27, "missing": 1, "invalid": 0, "days": [{"day": "วัน 1", "zone": "โซนตะวันตก-เหนือ", "distance_km": 8.506913555437087, "route_link": "https://www.google.com/maps/dir/?api=1&origin=17.1162984791717%2C104.078532906417&destination=17.188330550992%2C104.09554814233&travelmode=driving&waypoints=17.1502847378261%2C104.097287489979", "students": [{"pid": "D01-01-R14", "day": "วัน 1", "zone": "โซนตะวันตก-เหนือ", "seq": 1, "name": "นาย สิทธิพันธ์ สามารถ", "nickname": "-", "lat": 17.1162984791717, "lon": 104.078532906417, "point_link": "https://www.google.com/maps/search/?api=1&query=17.1162984791717,104.078532906417", "route_link": "https://www.google.com/maps/dir/?api=1&origin=17.1162984791717%2C104.078532906417&destination=17.188330550992%2C104.09554814233&travelmode=driving&waypoints=17.1502847378261%2C104.097287489979", "shared_link": "https://maps.app.goo.gl/SUzfR3awDq1DHbxP9"}, {"pid": "D01-02-R8", "day": "วัน 1", "zone": "โซนตะวันตก-เหนือ", "seq": 2, "name": "นางสาว สุพรรณษา สุขแสน", "nickname": "-", "lat": 17.1502847378261, "lon": 104.097287489979, "point_link": "https://www.google.com/maps/search/?api=1&query=17.1502847378261,104.097287489979", "route_link": "https://www.google.com/maps/dir/?api=1&origin=17.1162984791717%2C104.078532906417&destination=17.188330550992%2C104.09554814233&travelmode=driving&waypoints=17.1502847378261%2C104.097287489979", "shared_link": "https://maps.app.goo.gl/axqnX6giBQbb3i3K7"}, {"pid": "D01-03-R29", "day": "วัน 1", "zone": "โซนตะวันตก-เหนือ", "seq": 3, "name": "นางสาว ภัณทิรา ปันนิตามัย", "nickname": "-", "lat": 17.188330550992, "lon": 104.09554814233, "point_link": "https://www.google.com/maps/search/?api=1&query=17.188330550992,104.09554814233", "route_link": "https://www.google.com/maps/dir/?api=1&origin=17.1162984791717%2C104.078532906417&destination=17.188330550992%2C104.09554814233&travelmode=driving&waypoints=17.1502847378261%2C104.097287489979", "shared_link": "https://maps.app.goo.gl/uiJ98P77PPTaeDV3A?g_st=ac"}]}, {"day": "วัน 2", "zone": "โซนกลาง/ใกล้เมือง", "distance_km": 10.748003522484213, "route_link": "https://www.google.com/maps/dir/?api=1&origin=17.1658680017201%2C104.150289321167&destination=17.1056233144438%2C104.174273493573&travelmode=driving&waypoints=17.158912%2C104.13775%7C17.1471632351234%2C104.133777799999%7C17.147141636256%2C104.139603999998%7C17.1483956056645%2C104.144519960918%7C17.1309516943201%2C104.155149628835%7C17.1338682093383%2C104.165305999694%7C17.119979493108%2C104.167871828834", "students": [{"pid": "D02-01-R25", "day": "วัน 2", "zone": "โซนกลาง/ใกล้เมือง", "seq": 1, "name": "นาย ณัฐภูมิ นามสีฐาน", "nickname": "-", "lat": 17.1658680017201, "lon": 104.150289321167, "point_link": "https://www.google.com/maps/search/?api=1&query=17.1658680017201,104.150289321167", "route_link": "https://www.google.com/maps/dir/?api=1&origin=17.1658680017201%2C104.150289321167&destination=17.1056233144438%2C104.174273493573&travelmode=driving&waypoints=17.158912%2C104.13775%7C17.1471632351234%2C104.133777799999%7C17.147141636256%2C104.139603999998%7C17.1483956056645%2C104.144519960918%7C17.1309516943201%2C104.155149628835%7C17.1338682093383%2C104.165305999694%7C17.119979493108%2C104.167871828834", "shared_link": "https://maps.app.goo.gl/8eCMQZfcJ7g8w7iZA"}, {"pid": "D02-02-R17", "day": "วัน 2", "zone": "โซนกลาง/ใกล้เมือง", "seq": 2, "name": "นางสาว กานต์ธีรา รถสพงศ์", "nickname": "กาน", "lat": 17.158912, "lon": 104.13775, "point_link": "https://www.google.com/maps/search/?api=1&query=17.158912,104.13775", "route_link": "https://www.google.com/maps/dir/?api=1&origin=17.1658680017201%2C104.150289321167&destination=17.1056233144438%2C104.174273493573&travelmode=driving&waypoints=17.158912%2C104.13775%7C17.1471632351234%2C104.133777799999%7C17.147141636256%2C104.139603999998%7C17.1483956056645%2C104.144519960918%7C17.1309516943201%2C104.155149628835%7C17.1338682093383%2C104.165305999694%7C17.119979493108%2C104.167871828834", "shared_link": "https://maps.app.goo.gl/1herUxqq31a282bk9"}, {"pid": "D02-03-R5", "day": "วัน 2", "zone": "โซนกลาง/ใกล้เมือง", "seq": 3, "name": "นางสาว กิตติยาภรณ์ รังษี", "nickname": "-", "lat": 17.1471632351234, "lon": 104.133777799999, "point_link": "https://www.google.com/maps/search/?api=1&query=17.1471632351234,104.133777799999", "route_link": "https://www.google.com/maps/dir/?api=1&origin=17.1658680017201%2C104.150289321167&destination=17.1056233144438%2C104.174273493573&travelmode=driving&waypoints=17.158912%2C104.13775%7C17.1471632351234%2C104.133777799999%7C17.147141636256%2C104.139603999998%7C17.1483956056645%2C104.144519960918%7C17.1309516943201%2C104.155149628835%7C17.1338682093383%2C104.165305999694%7C17.119979493108%2C104.167871828834", "shared_link": "https://maps.app.goo.gl/PUrqF6sYc1kSzTct5"}, {"pid": "D02-04-R2", "day": "วัน 2", "zone": "โซนกลาง/ใกล้เมือง", "seq": 4, "name": "นาย เทวฤทธิ์ อุปพงษ์", "nickname": "-", "lat": 17.147141636256, "lon": 104.139603999998, "point_link": "https://www.google.com/maps/search/?api=1&query=17.147141636256,104.139603999998", "route_link": "https://www.google.com/maps/dir/?api=1&origin=17.1658680017201%2C104.150289321167&destination=17.1056233144438%2C104.174273493573&travelmode=driving&waypoints=17.158912%2C104.13775%7C17.1471632351234%2C104.133777799999%7C17.147141636256%2C104.139603999998%7C17.1483956056645%2C104.144519960918%7C17.1309516943201%2C104.155149628835%7C17.1338682093383%2C104.165305999694%7C17.119979493108%2C104.167871828834", "shared_link": "https://maps.app.goo.gl/UkSQEbmmVWvD2yx48"}, {"pid": "D02-05-R23", "day": "วัน 2", "zone": "โซนกลาง/ใกล้เมือง", "seq": 5, "name": "นางสาว อุษณีย์ กัลยาบาล", "nickname": "-", "lat": 17.1483956056645, "lon": 104.144519960918, "point_link": "https://www.google.com/maps/search/?api=1&query=17.1483956056645,104.144519960918", "route_link": "https://www.google.com/maps/dir/?api=1&origin=17.1658680017201%2C104.150289321167&destination=17.1056233144438%2C104.174273493573&travelmode=driving&waypoints=17.158912%2C104.13775%7C17.1471632351234%2C104.133777799999%7C17.147141636256%2C104.139603999998%7C17.1483956056645%2C104.144519960918%7C17.1309516943201%2C104.155149628835%7C17.1338682093383%2C104.165305999694%7C17.119979493108%2C104.167871828834", "shared_link": "https://maps.app.goo.gl/3LQ586kF83bk9Gdz7"}, {"pid": "D02-06-R22", "day": "วัน 2", "zone": "โซนกลาง/ใกล้เมือง", "seq": 6, "name": "นางสาว รุ่งนภา ศรีสุข", "nickname": "-", "lat": 17.1309516943201, "lon": 104.155149628835, "point_link": "https://www.google.com/maps/search/?api=1&query=17.1309516943201,104.155149628835", "route_link": "https://www.google.com/maps/dir/?api=1&origin=17.1658680017201%2C104.150289321167&destination=17.1056233144438%2C104.174273493573&travelmode=driving&waypoints=17.158912%2C104.13775%7C17.1471632351234%2C104.133777799999%7C17.147141636256%2C104.139603999998%7C17.1483956056645%2C104.144519960918%7C17.1309516943201%2C104.155149628835%7C17.1338682093383%2C104.165305999694%7C17.119979493108%2C104.167871828834", "shared_link": "https://maps.app.goo.gl/KMMfgzENmSzVJAscA"}, {"pid": "D02-07-R9", "day": "วัน 2", "zone": "โซนกลาง/ใกล้เมือง", "seq": 7, "name": "นาย ฉัตรนรินทร์ พงษ์ศิริ", "nickname": "-", "lat": 17.1338682093383, "lon": 104.165305999694, "point_link": "https://www.google.com/maps/search/?api=1&query=17.1338682093383,104.165305999694", "route_link": "https://www.google.com/maps/dir/?api=1&origin=17.1658680017201%2C104.150289321167&destination=17.1056233144438%2C104.174273493573&travelmode=driving&waypoints=17.158912%2C104.13775%7C17.1471632351234%2C104.133777799999%7C17.147141636256%2C104.139603999998%7C17.1483956056645%2C104.144519960918%7C17.1309516943201%2C104.155149628835%7C17.1338682093383%2C104.165305999694%7C17.119979493108%2C104.167871828834", "shared_link": "https://maps.app.goo.gl/q7nWFvfu9bPaeFMp6"}, {"pid": "D02-08-R21", "day": "วัน 2", "zone": "โซนกลาง/ใกล้เมือง", "seq": 8, "name": "นางสาว กรกนก สร้อยมาลัย", "nickname": "-", "lat": 17.119979493108, "lon": 104.167871828834, "point_link": "https://www.google.com/maps/search/?api=1&query=17.119979493108,104.167871828834", "route_link": "https://www.google.com/maps/dir/?api=1&origin=17.1658680017201%2C104.150289321167&destination=17.1056233144438%2C104.174273493573&travelmode=driving&waypoints=17.158912%2C104.13775%7C17.1471632351234%2C104.133777799999%7C17.147141636256%2C104.139603999998%7C17.1483956056645%2C104.144519960918%7C17.1309516943201%2C104.155149628835%7C17.1338682093383%2C104.165305999694%7C17.119979493108%2C104.167871828834", "shared_link": "https://maps.app.goo.gl/hBL5w3fDVPZPeArs7"}, {"pid": "D02-09-R11", "day": "วัน 2", "zone": "โซนกลาง/ใกล้เมือง", "seq": 9, "name": "นาย กรวิทย์ บุญลคร", "nickname": "-", "lat": 17.1056233144438, "lon": 104.174273493573, "point_link": "https://www.google.com/maps/search/?api=1&query=17.1056233144438,104.174273493573", "route_link": "https://www.google.com/maps/dir/?api=1&origin=17.1658680017201%2C104.150289321167&destination=17.1056233144438%2C104.174273493573&travelmode=driving&waypoints=17.158912%2C104.13775%7C17.1471632351234%2C104.133777799999%7C17.147141636256%2C104.139603999998%7C17.1483956056645%2C104.144519960918%7C17.1309516943201%2C104.155149628835%7C17.1338682093383%2C104.165305999694%7C17.119979493108%2C104.167871828834", "shared_link": "https://maps.app.goo.gl/DwMqwbpLFKsmywJ27"}]}, {"day": "วัน 3", "zone": "โซนใต้/ตะวันตกเฉียงใต้", "distance_km": 34.25414748546845, "route_link": "https://www.google.com/maps/dir/?api=1&origin=17.0903844137651%2C104.064945070618&destination=16.99716361943%2C104.169482928836&travelmode=driving&waypoints=17.07931483747%2C104.095202862219%7C17.0918724615872%2C104.107586244119%7C17.0991738908214%2C104.153555600005%7C17.0647265175799%2C104.151827057663%7C17.0534692286889%2C104.134455128834%7C17.0477769724327%2C104.098473769186%7C17.0484315146967%2C104.097171729923%7C16.9749059062875%2C104.128509587986", "students": [{"pid": "D03-01-R12", "day": "วัน 3", "zone": "โซนใต้/ตะวันตกเฉียงใต้", "seq": 1, "name": "นางสาว สุลลิตา หอมคุณ", "nickname": "-", "lat": 17.0903844137651, "lon": 104.064945070618, "point_link": "https://www.google.com/maps/search/?api=1&query=17.0903844137651,104.064945070618", "route_link": "https://www.google.com/maps/dir/?api=1&origin=17.0903844137651%2C104.064945070618&destination=16.99716361943%2C104.169482928836&travelmode=driving&waypoints=17.07931483747%2C104.095202862219%7C17.0918724615872%2C104.107586244119%7C17.0991738908214%2C104.153555600005%7C17.0647265175799%2C104.151827057663%7C17.0534692286889%2C104.134455128834%7C17.0477769724327%2C104.098473769186%7C17.0484315146967%2C104.097171729923%7C16.9749059062875%2C104.128509587986", "shared_link": "https://maps.app.goo.gl/4cd4R5xWtwnkKVTC8"}, {"pid": "D03-02-R18", "day": "วัน 3", "zone": "โซนใต้/ตะวันตกเฉียงใต้", "seq": 2, "name": "นางสาว ธิดารัตน์ แก้วมะ", "nickname": "-", "lat": 17.07931483747, "lon": 104.095202862219, "point_link": "https://www.google.com/maps/search/?api=1&query=17.07931483747,104.095202862219", "route_link": "https://www.google.com/maps/dir/?api=1&origin=17.0903844137651%2C104.064945070618&destination=16.99716361943%2C104.169482928836&travelmode=driving&waypoints=17.07931483747%2C104.095202862219%7C17.0918724615872%2C104.107586244119%7C17.0991738908214%2C104.153555600005%7C17.0647265175799%2C104.151827057663%7C17.0534692286889%2C104.134455128834%7C17.0477769724327%2C104.098473769186%7C17.0484315146967%2C104.097171729923%7C16.9749059062875%2C104.128509587986", "shared_link": "https://maps.app.goo.gl/z2Em4aRhCu3KCTJj7"}, {"pid": "D03-03-R15", "day": "วัน 3", "zone": "โซนใต้/ตะวันตกเฉียงใต้", "seq": 3, "name": "นาย ชนวีร์ ลีทนทา", "nickname": "-", "lat": 17.0918724615872, "lon": 104.107586244119, "point_link": "https://www.google.com/maps/search/?api=1&query=17.0918724615872,104.107586244119", "route_link": "https://www.google.com/maps/dir/?api=1&origin=17.0903844137651%2C104.064945070618&destination=16.99716361943%2C104.169482928836&travelmode=driving&waypoints=17.07931483747%2C104.095202862219%7C17.0918724615872%2C104.107586244119%7C17.0991738908214%2C104.153555600005%7C17.0647265175799%2C104.151827057663%7C17.0534692286889%2C104.134455128834%7C17.0477769724327%2C104.098473769186%7C17.0484315146967%2C104.097171729923%7C16.9749059062875%2C104.128509587986", "shared_link": "https://maps.app.goo.gl/XLrMrU3PP5W6Gavu8"}, {"pid": "D03-04-R6", "day": "วัน 3", "zone": "โซนใต้/ตะวันตกเฉียงใต้", "seq": 4, "name": "นางสาว วรกานต์ คำสงค์", "nickname": "-", "lat": 17.0991738908214, "lon": 104.153555600005, "point_link": "https://www.google.com/maps/search/?api=1&query=17.0991738908214,104.153555600005", "route_link": "https://www.google.com/maps/dir/?api=1&origin=17.0903844137651%2C104.064945070618&destination=16.99716361943%2C104.169482928836&travelmode=driving&waypoints=17.07931483747%2C104.095202862219%7C17.0918724615872%2C104.107586244119%7C17.0991738908214%2C104.153555600005%7C17.0647265175799%2C104.151827057663%7C17.0534692286889%2C104.134455128834%7C17.0477769724327%2C104.098473769186%7C17.0484315146967%2C104.097171729923%7C16.9749059062875%2C104.128509587986", "shared_link": "https://maps.app.goo.gl/wtBnVmkTzvceV3mM7"}, {"pid": "D03-05-R20", "day": "วัน 3", "zone": "โซนใต้/ตะวันตกเฉียงใต้", "seq": 5, "name": "นางสาว ปรีณาภา วานานวงศ์", "nickname": "-", "lat": 17.0647265175799, "lon": 104.151827057663, "point_link": "https://www.google.com/maps/search/?api=1&query=17.0647265175799,104.151827057663", "route_link": "https://www.google.com/maps/dir/?api=1&origin=17.0903844137651%2C104.064945070618&destination=16.99716361943%2C104.169482928836&travelmode=driving&waypoints=17.07931483747%2C104.095202862219%7C17.0918724615872%2C104.107586244119%7C17.0991738908214%2C104.153555600005%7C17.0647265175799%2C104.151827057663%7C17.0534692286889%2C104.134455128834%7C17.0477769724327%2C104.098473769186%7C17.0484315146967%2C104.097171729923%7C16.9749059062875%2C104.128509587986", "shared_link": "https://maps.app.goo.gl/ca67rKMiAP4Sps888"}, {"pid": "D03-06-R27", "day": "วัน 3", "zone": "โซนใต้/ตะวันตกเฉียงใต้", "seq": 6, "name": "นางสาว กฤติมา แง่ธรรม", "nickname": "-", "lat": 17.0534692286889, "lon": 104.134455128834, "point_link": "https://www.google.com/maps/search/?api=1&query=17.0534692286889,104.134455128834", "route_link": "https://www.google.com/maps/dir/?api=1&origin=17.0903844137651%2C104.064945070618&destination=16.99716361943%2C104.169482928836&travelmode=driving&waypoints=17.07931483747%2C104.095202862219%7C17.0918724615872%2C104.107586244119%7C17.0991738908214%2C104.153555600005%7C17.0647265175799%2C104.151827057663%7C17.0534692286889%2C104.134455128834%7C17.0477769724327%2C104.098473769186%7C17.0484315146967%2C104.097171729923%7C16.9749059062875%2C104.128509587986", "shared_link": "https://maps.app.goo.gl/CxBv3VTM4XALKTsSA"}, {"pid": "D03-07-R3", "day": "วัน 3", "zone": "โซนใต้/ตะวันตกเฉียงใต้", "seq": 7, "name": "นาย จิรัฐกิตติ์ ตระกูลศรสูรย์", "nickname": "-", "lat": 17.0477769724327, "lon": 104.098473769186, "point_link": "https://www.google.com/maps/search/?api=1&query=17.0477769724327,104.098473769186", "route_link": "https://www.google.com/maps/dir/?api=1&origin=17.0903844137651%2C104.064945070618&destination=16.99716361943%2C104.169482928836&travelmode=driving&waypoints=17.07931483747%2C104.095202862219%7C17.0918724615872%2C104.107586244119%7C17.0991738908214%2C104.153555600005%7C17.0647265175799%2C104.151827057663%7C17.0534692286889%2C104.134455128834%7C17.0477769724327%2C104.098473769186%7C17.0484315146967%2C104.097171729923%7C16.9749059062875%2C104.128509587986", "shared_link": "https://maps.app.goo.gl/pM2XEzKfDVpJwivt9"}, {"pid": "D03-08-R13", "day": "วัน 3", "zone": "โซนใต้/ตะวันตกเฉียงใต้", "seq": 8, "name": "นางสาว กิตติยา ดีทะเล", "nickname": "-", "lat": 17.0484315146967, "lon": 104.097171729923, "point_link": "https://www.google.com/maps/search/?api=1&query=17.0484315146967,104.097171729923", "route_link": "https://www.google.com/maps/dir/?api=1&origin=17.0903844137651%2C104.064945070618&destination=16.99716361943%2C104.169482928836&travelmode=driving&waypoints=17.07931483747%2C104.095202862219%7C17.0918724615872%2C104.107586244119%7C17.0991738908214%2C104.153555600005%7C17.0647265175799%2C104.151827057663%7C17.0534692286889%2C104.134455128834%7C17.0477769724327%2C104.098473769186%7C17.0484315146967%2C104.097171729923%7C16.9749059062875%2C104.128509587986", "shared_link": "https://maps.app.goo.gl/WGaVo5hwrYPJDbM78"}, {"pid": "D03-09-R28", "day": "วัน 3", "zone": "โซนใต้/ตะวันตกเฉียงใต้", "seq": 9, "name": "นางสาว พิมชนก ศรีทิน", "nickname": "-", "lat": 16.9749059062875, "lon": 104.128509587986, "point_link": "https://www.google.com/maps/search/?api=1&query=16.9749059062875,104.128509587986", "route_link": "https://www.google.com/maps/dir/?api=1&origin=17.0903844137651%2C104.064945070618&destination=16.99716361943%2C104.169482928836&travelmode=driving&waypoints=17.07931483747%2C104.095202862219%7C17.0918724615872%2C104.107586244119%7C17.0991738908214%2C104.153555600005%7C17.0647265175799%2C104.151827057663%7C17.0534692286889%2C104.134455128834%7C17.0477769724327%2C104.098473769186%7C17.0484315146967%2C104.097171729923%7C16.9749059062875%2C104.128509587986", "shared_link": "https://maps.app.goo.gl/iuQHaUuLZLFR2dQ78"}, {"pid": "D03-10-R16", "day": "วัน 3", "zone": "โซนใต้/ตะวันตกเฉียงใต้", "seq": 10, "name": "นาย สุภเวช วิดีสา", "nickname": "-", "lat": 16.99716361943, "lon": 104.169482928836, "point_link": "https://www.google.com/maps/search/?api=1&query=16.99716361943,104.169482928836", "route_link": "https://www.google.com/maps/dir/?api=1&origin=17.0903844137651%2C104.064945070618&destination=16.99716361943%2C104.169482928836&travelmode=driving&waypoints=17.07931483747%2C104.095202862219%7C17.0918724615872%2C104.107586244119%7C17.0991738908214%2C104.153555600005%7C17.0647265175799%2C104.151827057663%7C17.0534692286889%2C104.134455128834%7C17.0477769724327%2C104.098473769186%7C17.0484315146967%2C104.097171729923%7C16.9749059062875%2C104.128509587986", "shared_link": "https://maps.app.goo.gl/MwZjmw9Zbty8kjvf6"}]}, {"day": "วัน 4", "zone": "โซนตะวันออก", "distance_km": 13.462537774534804, "route_link": "https://www.google.com/maps/dir/?api=1&origin=17.102677792966%2C104.201938746596&destination=17.1340839405602%2C104.281333300258&travelmode=driving&waypoints=17.1034731174708%2C104.210569670836%7C17.1478786480976%2C104.236333300006%7C17.1189341464927%2C104.260732928831", "students": [{"pid": "D04-01-R7", "day": "วัน 4", "zone": "โซนตะวันออก", "seq": 1, "name": "นางสาว ศุภาพิชญ์ พวงมาลา", "nickname": "-", "lat": 17.102677792966, "lon": 104.201938746596, "point_link": "https://www.google.com/maps/search/?api=1&query=17.102677792966,104.201938746596", "route_link": "https://www.google.com/maps/dir/?api=1&origin=17.102677792966%2C104.201938746596&destination=17.1340839405602%2C104.281333300258&travelmode=driving&waypoints=17.1034731174708%2C104.210569670836%7C17.1478786480976%2C104.236333300006%7C17.1189341464927%2C104.260732928831", "shared_link": "https://maps.app.goo.gl/DLdh2D8p5K4W5hnA9"}, {"pid": "D04-02-R10", "day": "วัน 4", "zone": "โซนตะวันออก", "seq": 2, "name": "นาย ธนารัตน์ ตันมูล", "nickname": "-", "lat": 17.1034731174708, "lon": 104.210569670836, "point_link": "https://www.google.com/maps/search/?api=1&query=17.1034731174708,104.210569670836", "route_link": "https://www.google.com/maps/dir/?api=1&origin=17.102677792966%2C104.201938746596&destination=17.1340839405602%2C104.281333300258&travelmode=driving&waypoints=17.1034731174708%2C104.210569670836%7C17.1478786480976%2C104.236333300006%7C17.1189341464927%2C104.260732928831", "shared_link": "https://maps.app.goo.gl/UFmXJC9ZbUSqYiVQ8"}, {"pid": "D04-03-R26", "day": "วัน 4", "zone": "โซนตะวันออก", "seq": 3, "name": "นาย กรวิก ฮมผาราช", "nickname": "-", "lat": 17.1478786480976, "lon": 104.236333300006, "point_link": "https://www.google.com/maps/search/?api=1&query=17.1478786480976,104.236333300006", "route_link": "https://www.google.com/maps/dir/?api=1&origin=17.102677792966%2C104.201938746596&destination=17.1340839405602%2C104.281333300258&travelmode=driving&waypoints=17.1034731174708%2C104.210569670836%7C17.1478786480976%2C104.236333300006%7C17.1189341464927%2C104.260732928831", "shared_link": "https://maps.app.goo.gl/3r3W3kqNs38SHKQk6"}, {"pid": "D04-04-R24", "day": "วัน 4", "zone": "โซนตะวันออก", "seq": 4, "name": "นางสาว ปาริชาติ จันทรังษี", "nickname": "-", "lat": 17.1189341464927, "lon": 104.260732928831, "point_link": "https://www.google.com/maps/search/?api=1&query=17.1189341464927,104.260732928831", "route_link": "https://www.google.com/maps/dir/?api=1&origin=17.102677792966%2C104.201938746596&destination=17.1340839405602%2C104.281333300258&travelmode=driving&waypoints=17.1034731174708%2C104.210569670836%7C17.1478786480976%2C104.236333300006%7C17.1189341464927%2C104.260732928831", "shared_link": "https://maps.app.goo.gl/ADyAetKejsitpmHV8"}, {"pid": "D04-05-R4", "day": "วัน 4", "zone": "โซนตะวันออก", "seq": 5, "name": "นาย ไกรวิชญ์ กองโพธิ์ชัย", "nickname": "-", "lat": 17.1340839405602, "lon": 104.281333300258, "point_link": "https://www.google.com/maps/search/?api=1&query=17.1340839405602,104.281333300258", "route_link": "https://www.google.com/maps/dir/?api=1&origin=17.102677792966%2C104.201938746596&destination=17.1340839405602%2C104.281333300258&travelmode=driving&waypoints=17.1034731174708%2C104.210569670836%7C17.1478786480976%2C104.236333300006%7C17.1189341464927%2C104.260732928831", "shared_link": "https://maps.app.goo.gl/mMyJg4VhN3QtLJD89"}]}], "issues": {"invalid": [], "missing": [{"name": "นางสาว ลีลาวดี แจ่มสะอาด", "nickname": "-", "issue": "ยังไม่มีพิกัด"}], "far_warnings": []}};
+const STORAGE_KEY = 'home_visit_6_2_edit_v2_checklist_v1';
+let state = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+let markers = {};
+const map = L.map('map', { zoomControl:true });
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   maxZoom: 19,
   attribution: '&copy; OpenStreetMap contributors'
 }).addTo(map);
 
-const allLayers = {};
-let allBounds = [];
-
-function addDay(day) {
-  const route = routes[day];
-  const color = dayColors[day] || "#64748b";
-  const layer = L.layerGroup();
-
-  const latlngs = route.points.map(p => [p.lat, p.lon]);
-  latlngs.forEach(ll => allBounds.push(ll));
-
-  if (latlngs.length > 1) {
-    L.polyline(latlngs, {
-      color: color,
-      weight: 5,
-      opacity: 0.85,
-      lineJoin: 'round'
-    }).addTo(layer);
-  }
-
-  route.points.forEach(p => {
-    const icon = makeIcon(day, p.seq);
-    const nick = p.nick ? ` (${p.nick})` : "";
-    const popup = `
-      <b>${day} ลำดับ ${p.seq}</b><br>
-      ${route.zone}<br>
-      ${p.name}${nick}<br>
-      <span style="color:#64748b">${p.lat.toFixed(6)}, ${p.lon.toFixed(6)}</span><br>
-      <a href="https://www.google.com/maps/search/?api=1&query=${p.lat},${p.lon}" target="_blank">เปิดตำแหน่งนี้ใน Google Maps</a>
-    `;
-    const marker = L.marker([p.lat, p.lon], { icon }).bindPopup(popup).addTo(layer);
-    markerRefs[pointKey(day, p.seq)] = marker;
+function markerClass(zone) {
+  if (zone.includes('ตะวันออก')) return 'east';
+  if (zone.includes('ตะวันตก')) return 'west';
+  return 'central';
+}
+function makeIcon(seq, done, zone) {
+  return L.divIcon({
+    className: '',
+    html: `<div class="number-marker ${done ? 'done' : markerClass(zone)}">${done ? '✓' : seq}</div>`,
+    iconSize: [28,28], iconAnchor: [14,14]
   });
-
-  allLayers[day] = layer;
-  layer.addTo(map);
 }
-
-Object.keys(routes).forEach(addDay);
-
-function showAll() {
-  Object.values(allLayers).forEach(layer => {
-    if (!map.hasLayer(layer)) layer.addTo(map);
-  });
-  if (allBounds.length) map.fitBounds(allBounds, { padding: [30, 30] });
+function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+function isDone(pid) { return !!state[pid]; }
+function toggleDone(pid, checked) {
+  state[pid] = checked;
+  if (!checked) delete state[pid];
+  saveState();
+  updateUI();
 }
-
-function focusDay(day) {
-  Object.entries(allLayers).forEach(([d, layer]) => {
-    if (d === day) {
-      if (!map.hasLayer(layer)) layer.addTo(map);
-    } else {
-      if (map.hasLayer(layer)) map.removeLayer(layer);
-    }
-  });
-  const pts = routes[day].points.map(p => [p.lat, p.lon]);
-  if (pts.length) map.fitBounds(pts, { padding: [40, 40] });
-}
-
-
-function updateRowVisual(row, visited) {
-  row.classList.toggle('visited', !!visited);
-}
-
-function updateMarker(day, seq) {
-  const marker = markerRefs[pointKey(day, seq)];
-  if (marker) marker.setIcon(makeIcon(day, seq));
-}
-
-function updateProgress(day) {
-  const route = routes[day];
-  const total = route.points.length;
-  const done = route.points.filter(p => isVisited(day, p.seq)).length;
-  const progress = document.getElementById(`progress-${day}`);
-  if (progress) {
-    progress.innerHTML = `เช็กแล้ว <b>${done}/${total}</b> บ้าน · เหลือ <b>${total - done}</b> บ้าน`;
-  }
-  updateOverallProgress();
-}
-
-function updateOverallProgress() {
-  const points = Object.entries(routes).flatMap(([day, route]) => route.points.map(p => ({ day, ...p })));
-  const total = points.length;
-  const done = points.filter(p => isVisited(p.day, p.seq)).length;
-  const el = document.getElementById('overall-progress');
-  if (el) el.innerHTML = `สถานะรวม: เช็กแล้ว <b>${done}/${total}</b> บ้าน · เหลือ <b>${total - done}</b> บ้าน`;
-}
-
-function setupChecklist() {
-  Object.entries(routes).forEach(([day, route]) => {
-    const card = document.getElementById(`card-${day}`);
-    if (!card) return;
-    const buttonRow = card.querySelector('.button-row');
-    if (buttonRow && !card.querySelector('.progress-line')) {
-      const progress = document.createElement('div');
-      progress.className = 'progress-line';
-      progress.id = `progress-${day}`;
-      buttonRow.after(progress);
-    }
-    const rows = card.querySelectorAll('.student-row');
-    rows.forEach((row, index) => {
-      const p = route.points[index];
-      if (!p || row.querySelector('.visit-check')) return;
-      const label = document.createElement('label');
-      label.className = 'visit-check';
-      label.innerHTML = `<input type="checkbox" aria-label="ติ๊กว่าไปเยี่ยมบ้านนี้แล้ว"><span>ไปแล้ว</span>`;
-      row.appendChild(label);
-      const input = label.querySelector('input');
-      input.checked = isVisited(day, p.seq);
-      updateRowVisual(row, input.checked);
-      input.addEventListener('change', () => {
-        if (input.checked) {
-          visitStatus[pointKey(day, p.seq)] = {
-            visited: true,
-            checkedAt: new Date().toISOString()
-          };
-        } else {
-          delete visitStatus[pointKey(day, p.seq)];
-        }
-        saveVisitStatus();
-        updateRowVisual(row, input.checked);
-        updateProgress(day);
-        updateMarker(day, p.seq);
-      });
+function updateUI() {
+  let total = 0, done = 0;
+  DATA.days.forEach(day => {
+    let dayTotal = day.students.length, dayDone = 0;
+    day.students.forEach(s => {
+      total++;
+      if (isDone(s.pid)) { done++; dayDone++; }
+      const row = document.getElementById('row-' + s.pid);
+      const cb = document.getElementById('cb-' + s.pid);
+      if (row) row.classList.toggle('done', isDone(s.pid));
+      if (cb) cb.checked = isDone(s.pid);
+      if (markers[s.pid]) markers[s.pid].setIcon(makeIcon(s.seq, isDone(s.pid), s.zone));
     });
-    updateProgress(day);
+    const bar = document.getElementById('bar-' + day.day.replace(/\s/g,''));
+    const txt = document.getElementById('count-' + day.day.replace(/\s/g,''));
+    if (bar) bar.style.width = (dayDone/dayTotal*100) + '%';
+    if (txt) txt.textContent = `${dayDone}/${dayTotal} ไปแล้ว`;
   });
-  updateOverallProgress();
+  document.getElementById('doneCount').textContent = done;
+  document.getElementById('remainCount').textContent = total - done;
 }
-
-function resetAllVisits() {
-  const ok = confirm('ต้องการล้างสถานะบ้านที่ติ๊กว่าไปแล้วทั้งหมดใช่ไหม?');
-  if (!ok) return;
-  visitStatus = {};
-  saveVisitStatus();
-  document.querySelectorAll('.visit-check input').forEach(input => {
-    input.checked = false;
-    updateRowVisual(input.closest('.student-row'), false);
-  });
-  Object.entries(routes).forEach(([day, route]) => {
-    route.points.forEach(p => updateMarker(day, p.seq));
-    updateProgress(day);
-  });
-  updateOverallProgress();
+function clearAllChecks() {
+  if (confirm('ต้องการล้างสถานะที่ติ๊กไว้ทั้งหมดหรือไม่?')) { state = {}; saveState(); updateUI(); }
 }
-
-function downloadVisitStatus() {
-  const rows = [["วัน", "ลำดับ", "ชื่อ", "ชื่อเล่น", "ละติจูด", "ลองจิจูด", "สถานะ", "เวลาที่ติ๊ก"]];
-  Object.entries(routes).forEach(([day, route]) => {
-    route.points.forEach(p => {
-      rows.push([
-        day,
-        p.seq,
-        p.name,
-        p.nick || "",
-        p.lat,
-        p.lon,
-        isVisited(day, p.seq) ? "ไปแล้ว" : "ยังไม่ไป",
-        checkedAt(day, p.seq)
-      ]);
-    });
-  });
-  const csv = '\ufeff' + rows.map(row => row.map(value => `"${String(value).replace(/"/g, '""')}"`).join(',')).join('\n');
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
+function downloadStatusCSV() {
+  const rows = [['วัน','โซน','ลำดับ','ชื่อนักเรียน','ชื่อเล่น','ละติจูด','ลองจิจูด','สถานะ']];
+  DATA.days.forEach(day => day.students.forEach(s => rows.push([day.day, day.zone, s.seq, s.name, s.nickname, s.lat, s.lon, isDone(s.pid) ? 'ไปแล้ว' : 'ยังไม่ไป'])));
+  const csv = rows.map(r => r.map(v => '"' + String(v).replaceAll('"','""') + '"').join(',')).join('
+');
+  const blob = new Blob(['﻿' + csv], {type:'text/csv;charset=utf-8;'});
   const a = document.createElement('a');
-  a.href = url;
-  a.download = 'home_visit_status_6_2.csv';
-  document.body.appendChild(a);
+  a.href = URL.createObjectURL(blob);
+  a.download = 'home_visit_6_2_status.csv';
   a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
+  URL.revokeObjectURL(a.href);
 }
-
-const legend = document.getElementById("legend");
-legend.innerHTML = Object.entries(routes).map(([day, route]) => {
-  const color = dayColors[day] || "#64748b";
-  return `<div><span class="legend-dot" style="background:${color}"></span>${day} · ${route.zone}</div>`;
-}).join("");
-
-showAll();
-setupChecklist();
+function renderWarnings() {
+  let html = '';
+  if (DATA.invalid > 0) {
+    html += `<div class="issue"><h3>พิกัดผิดปกติ ${DATA.invalid} คน</h3>`;
+    DATA.issues.invalid.forEach(p => html += `<div>• ${p.name}: ${p.lat}, ${p.lon}<br><span class="small">${p.issue}</span></div>`);
+    html += `</div>`;
+  }
+  if (DATA.missing > 0) {
+    html += `<div class="issue"><h3>ยังไม่มีพิกัด ${DATA.missing} คน</h3>`;
+    DATA.issues.missing.forEach(p => html += `<div>• ${p.name} ${p.nickname && p.nickname !== '-' ? '('+p.nickname+')' : ''}</div>`);
+    html += `</div>`;
+  }
+  if (DATA.issues.far_warnings.length > 0) {
+    html += `<div class="issue"><h3>พิกัดไกลจากกลุ่มมาก</h3>`;
+    DATA.issues.far_warnings.forEach(p => html += `<div>• ${p.name} ห่างจากกึ่งกลางประมาณ ${p.distance_km} กม.</div>`);
+    html += `</div>`;
+  }
+  document.getElementById('warnings').innerHTML = html;
+}
+function renderSidebar() {
+  const wrap = document.getElementById('days');
+  wrap.innerHTML = DATA.days.map(day => {
+    const safeDay = day.day.replace(/\s/g,'');
+    return `<section class="day">
+      <div class="day-header">
+        <h2>${day.day} • ${day.zone}</h2>
+        <div class="day-meta">จำนวน ${day.students.length} บ้าน • ระยะเส้นตรงประมาณ ${day.distance_km.toFixed(2)} กม. • <span id="count-${safeDay}">0/${day.students.length} ไปแล้ว</span></div>
+        <div class="progress-line"><div class="progress-bar" id="bar-${safeDay}"></div></div>
+        <div class="toolbar"><a class="btn btn-blue" target="_blank" href="${day.route_link}">เปิดนำทาง Google Maps</a></div>
+      </div>
+      <div>${day.students.map(s => `<div class="student" id="row-${s.pid}">
+        <div><input id="cb-${s.pid}" type="checkbox" onchange="toggleDone('${s.pid}', this.checked)"></div>
+        <div><div class="name"><span class="seq">${s.seq}.</span> ${s.name}</div>
+        <div class="detail">ชื่อเล่น: ${s.nickname}<br>พิกัด: ${Number(s.lat).toFixed(6)}, ${Number(s.lon).toFixed(6)}<br><a target="_blank" href="${s.point_link}">เปิดตำแหน่งบ้าน</a></div></div>
+      </div>`).join('')}</div>
+    </section>`;
+  }).join('');
+}
+function renderMap() {
+  const bounds = [];
+  const colors = ['#0f766e','#2563eb','#ea580c','#7c3aed'];
+  DATA.days.forEach((day, idx) => {
+    const latlngs = day.students.map(s => [s.lat, s.lon]);
+    if (latlngs.length > 1) L.polyline(latlngs, {color: colors[idx % colors.length], weight:4, opacity:0.72}).addTo(map);
+    day.students.forEach(s => {
+      const m = L.marker([s.lat, s.lon], {icon: makeIcon(s.seq, isDone(s.pid), s.zone)}).addTo(map);
+      m.bindPopup(`<b>${day.day} ลำดับ ${s.seq}</b><br>กดดูรายชื่อในแถบด้านข้าง`);
+      m.on('click', () => document.getElementById('row-' + s.pid)?.scrollIntoView({behavior:'smooth', block:'center'}));
+      markers[s.pid] = m;
+      bounds.push([s.lat, s.lon]);
+    });
+  });
+  if (bounds.length) map.fitBounds(bounds, {padding:[30,30]}); else map.setView([17.15,104.15], 10);
+}
+renderWarnings(); renderSidebar(); renderMap(); updateUI();
 </script>
 </body>
 </html>
