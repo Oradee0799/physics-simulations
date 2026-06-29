@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>แผนที่รัศมีบอลลูน + เขตห้ามบิน ATZ — กรมอุตุนิยมวิทยา</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --sky:#0a1628;--mid:#0d2244;--cloud:#e8f0fb;
+  --blue:#3b8beb;--amber:#EF9F27;--green:#639922;
+  --red:#A32D2D;--nfz:#E24B4A;
+  --muted:#7a9cc0;--text:#dce8f8;
+  --border:rgba(59,139,235,0.22);--panel:rgba(8,18,36,0.97);
+}
+body{font-family:'Sarabun',sans-serif;background:var(--sky);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+header{background:var(--mid);border-bottom:1px solid var(--border);padding:11px 20px;display:flex;align-items:center;gap:12px;flex-shrink:0;z-index:10;}
+.h-icon{font-size:20px;line-height:1;}
+.h-title{font-size:13.5px;font-weight:700;color:var(--cloud);}
+.h-sub{font-size:10.5px;color:var(--muted);font-family:'IBM Plex Mono',monospace;margin-top:1px;}
+.h-badges{margin-left:auto;display:flex;gap:6px;flex-shrink:0;}
+.badge{border-radius:20px;padding:3px 10px;font-size:10.5px;font-family:'IBM Plex Mono',monospace;white-space:nowrap;}
+.bdg-b{background:rgba(59,139,235,0.12);border:1px solid rgba(59,139,235,0.35);color:#85B7EB;}
+.bdg-r{background:rgba(226,75,74,0.12);border:1px solid rgba(226,75,74,0.35);color:#F09595;}
+.main{display:flex;flex:1;min-height:0;}
+#map{flex:1;min-height:0;}
+.sidebar{width:278px;background:var(--panel);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0;}
+.s-label{font-size:9.5px;font-family:'IBM Plex Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:13px 16px 7px;border-bottom:1px solid var(--border);}
+.tabs{border-bottom:1px solid var(--border);}
+.tab{display:flex;align-items:center;gap:9px;width:100%;padding:10px 16px;background:transparent;border:none;border-left:3px solid transparent;color:var(--muted);font-family:'Sarabun',sans-serif;font-size:13px;text-align:left;cursor:pointer;transition:background .12s;}
+.tab:hover{background:rgba(59,139,235,0.07);}
+.tab.on{background:rgba(59,139,235,0.12);border-left-color:var(--blue);color:var(--cloud);}
+.tab-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.nfz-row{display:flex;align-items:center;gap:8px;padding:9px 16px;border-bottom:1px solid var(--border);font-size:12px;color:var(--muted);}
+.nfz-row input{cursor:pointer;accent-color:#E24B4A;}
+.nfz-row.active{color:var(--cloud);}
+.info-scroll{flex:1;overflow-y:auto;padding:12px 14px;}
+.info-scroll::-webkit-scrollbar{width:4px;}
+.info-scroll::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+.icard{border:1px solid var(--border);border-radius:8px;padding:11px 13px;margin-bottom:9px;}
+.ic-prov{font-size:9.5px;font-family:'IBM Plex Mono',monospace;color:var(--muted);margin-bottom:3px;}
+.ic-loc{font-size:12px;color:var(--text);margin-bottom:6px;line-height:1.4;}
+.ic-lbl{font-size:11px;color:var(--muted);margin-bottom:1px;}
+.ic-km{font-size:19px;font-weight:700;font-family:'IBM Plex Mono',monospace;color:var(--cloud);}
+.ic-kms{font-size:12px;color:var(--muted);}
+.ic-bdg{font-size:10.5px;padding:2px 8px;border-radius:10px;display:inline-block;margin-top:3px;}
+.bdy{background:rgba(99,153,34,0.14);border:1px solid rgba(99,153,34,0.45);color:#97C459;}
+.bdn{background:rgba(163,45,45,0.13);border:1px solid rgba(163,45,45,0.45);color:#F09595;}
+.ic-sep{border-top:0.5px solid var(--border);margin:8px 0;}
+.legend{padding:12px 16px 14px;border-top:1px solid var(--border);}
+.leg-title{font-size:9.5px;font-family:'IBM Plex Mono',monospace;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:9px;}
+.leg-row{display:flex;align-items:center;gap:9px;margin-bottom:6px;font-size:11.5px;color:var(--text);}
+.leg-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.leg-ring{width:22px;height:10px;border-radius:3px;flex-shrink:0;}
+.leaflet-container{background:#cfe0ec!important;}
+.leaflet-popup-content-wrapper{background:#0c1e38;border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Sarabun',sans-serif;box-shadow:0 6px 24px rgba(0,0,0,.55);}
+.leaflet-popup-tip{background:#0c1e38;}
+.leaflet-popup-content{margin:11px 15px;}
+.pop-t{font-weight:700;font-size:13.5px;color:var(--cloud);margin-bottom:3px;}
+.pop-s{font-size:11px;color:var(--muted);font-family:'IBM Plex Mono',monospace;line-height:1.6;}
+.pop-tag{font-size:11px;margin-top:5px;}
+@media(max-width:680px){.main{flex-direction:column-reverse;}.sidebar{width:100%;max-height:220px;border-left:none;border-top:1px solid var(--border);}.legend{display:none;}}
+</style>
+</head>
+<body>
+
+<header>
+  <span class="h-icon">🎈</span>
+  <div>
+    <div class="h-title">แผนที่รัศมีบอลลูนตรวจอากาศ + เขตห้ามบิน ATZ</div>
+    <div class="h-sub">RADIOSONDE 13 STATIONS · TMD / IGRA-NOAA · NFZ: CAAT ATZ 9 KM · ชลบุรี → บางนา (WMO 48453)</div>
+  </div>
+  <div class="h-badges">
+    <span class="badge bdg-b">🎈 20 กม.</span>
+    <span class="badge bdg-r">⛔ ATZ 9 กม.</span>
+  </div>
+</header>
+
+<div class="main">
+  <div id="map"></div>
+  <div class="sidebar">
+    <div class="s-label">เลือกพื้นที่</div>
+    <div class="tabs" id="tabs">
+      <button class="tab on" data-v="all" onclick="go('all')">
+        <span class="tab-dot" style="background:var(--blue)"></span>ทั้งประเทศ — 13 สถานี
+      </button>
+      <button class="tab" data-v="cm" onclick="go('cm')">
+        <span class="tab-dot" style="background:var(--amber)"></span>จ.เชียงใหม่
+      </button>
+      <button class="tab" data-v="kk" onclick="go('kk')">
+        <span class="tab-dot" style="background:var(--amber)"></span>จ.ขอนแก่น
+      </button>
+      <button class="tab" data-v="cb" onclick="go('cb')">
+        <span class="tab-dot" style="background:var(--amber)"></span>จ.ชลบุรี
+        <span style="font-size:10px;opacity:.6;margin-left:2px">(บางนา)</span>
+      </button>
+    </div>
+    <label class="nfz-row active" id="nfzlbl">
+      <input type="checkbox" id="nfzchk" onchange="toggleNFZ()" checked/>
+      แสดงเขตห้ามบิน ATZ สนามบิน
+    </label>
+    <div class="s-label">สถานที่เป้าหมาย</div>
+    <div class="info-scroll" id="info-area"></div>
+    <div class="legend">
+      <div class="leg-title">สัญลักษณ์</div>
+      <div class="leg-row"><div class="leg-dot" style="background:var(--blue);border:1.5px solid rgba(255,255,255,.4)"></div>สถานีปล่อยบอลลูน (13 แห่ง)</div>
+      <div class="leg-row"><div class="leg-dot" style="background:var(--blue);border:2px solid var(--amber)"></div>สถานีในโจทย์ 3 จังหวัด</div>
+      <div class="leg-row"><div class="leg-ring" style="border:2px dashed var(--blue);background:rgba(59,139,235,.06)"></div>รัศมีบอลลูน 20 กม.</div>
+      <div class="leg-row"><div class="leg-ring" style="border:2px solid #E24B4A;background:rgba(226,75,74,.12)"></div>ATZ สนามบิน 9 กม. (ห้ามบิน)</div>
+      <div class="leg-row"><div class="leg-dot" style="background:var(--green)"></div>สถานที่ (อยู่ในรัศมี 20 กม.)</div>
+      <div class="leg-row"><div class="leg-dot" style="background:var(--red)"></div>สถานที่ (นอกรัศมี 20 กม.)</div>
+      <div style="margin-top:10px;font-size:10px;color:var(--muted);line-height:1.7">
+        ชลบุรี → สถานีบอลลูนที่ใกล้ที่สุดคือ<br>
+        <b style="color:var(--cloud)">บางนา (WMO 48453, กทม.)</b><br>
+        ข้อมูลสถานี: IGRA v2 (NOAA/NCEI)<br>
+        <span style="color:#F09595">ยืนยัน NFZ จาก uasportal.caat.or.th</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const STA=[
+  {n:'เชียงใหม่',       w:48327,la:18.7706,lo:98.9683, pv:'cm'},
+  {n:'อุดรธานี',        w:48354,la:17.3769,lo:102.8094,pv:null},
+  {n:'พิษณุโลก',        w:48378,la:16.7961,lo:100.2758,pv:null},
+  {n:'ขอนแก่น',         w:48381,la:16.4608,lo:102.7894,pv:'kk'},
+  {n:'อุบลราชธานี',     w:48407,la:15.2500,lo:104.8667,pv:null},
+  {n:'นครราชสีมา',      w:48431,la:14.9681,lo:102.0858,pv:null},
+  {n:'บางนา',           w:48453,la:13.6664,lo:100.6061,pv:'cb'},
+  {n:'สัตหีบ',          w:48477,la:12.6914,lo:100.9853,pv:null},
+  {n:'จันทบุรี',        w:48480,la:12.6094,lo:102.1039,pv:null},
+  {n:'ประจวบคีรีขันธ์', w:48500,la:11.8350,lo:99.8103, pv:null},
+  {n:'สุราษฎร์ธานี',    w:48551,la:9.1342, lo:99.1519, pv:null},
+  {n:'ภูเก็ต',          w:48565,la:8.1450, lo:98.3144, pv:null},
+  {n:'สงขลา',           w:48568,la:7.1819, lo:100.6075,pv:null}
+];
+const TGT=[
+  {n:'141/664 ม.2 ต.ต้นเปา อ.สันกำแพง',       pv:'cm',la:18.7582,lo:99.0580},
+  {n:'บ้านนารีสอร์ท ต.บ้านทุ่ม อ.เมืองขอนแก่น',pv:'kk',la:16.4498,lo:102.6797},
+  {n:'Shore Residence ต.บ้านสวน อ.เมืองชลบุรี', pv:'cb',la:13.3545,lo:100.9744}
+];
+const PNAME={cm:'เชียงใหม่',kk:'ขอนแก่น',cb:'ชลบุรี'};
+const NFZAPT={
+  cm:[{n:'ท่าอากาศยานเชียงใหม่ (CNX)',     la:18.7668,lo:98.9628}],
+  kk:[{n:'ท่าอากาศยานขอนแก่น (KKC/VTUK)',  la:16.4660,lo:102.7844}],
+  cb:[{n:'ท่าอากาศยานสุวรรณภูมิ (BKK)',    la:13.6800,lo:100.7501},
+      {n:'ท่าอากาศยานดอนเมือง (DMK)',       la:13.9132,lo:100.6066}]
+};
+
+function hav(a,b,c,d){
+  const x=Math.sin((c-a)*Math.PI/360)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin((d-b)*Math.PI/360)**2;
+  return 6371*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
+}
+function matchSta(t){return STA.find(s=>s.pv===t.pv)||null;}
+function nearestApt(pv,t){
+  const apts=NFZAPT[pv]; if(!apts)return null;
+  let best={d:Infinity,a:null};
+  apts.forEach(a=>{const d=hav(t.la,t.lo,a.la,a.lo);if(d<best.d)best={d,a};});
+  return best.a?best:null;
+}
+
+const map=L.map('map',{zoomControl:true});
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{
+  attribution:'&copy; <a href="https://carto.com/" target="_blank">CARTO</a> | &copy; OSM',
+  subdomains:'abcd',maxZoom:18
+}).addTo(map);
+
+STA.forEach(s=>{
+  const o=!!s.pv;
+  L.circle([s.la,s.lo],{radius:20000,color:'#3b8beb',weight:o?2:1.5,opacity:o?.85:.5,fillColor:'#3b8beb',fillOpacity:0.06,dashArray:o?'8 5':'5 4'}).addTo(map);
+  L.circleMarker([s.la,s.lo],{radius:o?10:7,fillColor:'#3b8beb',color:o?'#EF9F27':'#fff',weight:o?3:2,fillOpacity:1})
+    .bindPopup('<div class="pop-t">📡 '+s.n+'</div><div class="pop-s">WMO '+s.w+'<br>'+s.la.toFixed(4)+'°N, '+s.lo.toFixed(4)+'°E</div>'+(o?'<div class="pop-tag" style="color:#EF9F27">★ สถานีในโจทย์ จ.'+PNAME[s.pv]+'</div>':''))
+    .addTo(map);
+});
+
+TGT.forEach(t=>{
+  const ms=matchSta(t),d=ms?hav(t.la,t.lo,ms.la,ms.lo):Infinity,inR=d<=20;
+  if(ms)L.polyline([[ms.la,ms.lo],[t.la,t.lo]],{color:inR?'#639922':'#888',weight:1.5,opacity:.7,dashArray:'5 5'}).addTo(map);
+  L.circleMarker([t.la,t.lo],{radius:8,fillColor:inR?'#639922':'#A32D2D',color:'#fff',weight:2.5,fillOpacity:1})
+    .bindPopup('<div class="pop-t">📍 '+t.n+'</div>'+(ms?'<div class="pop-s">สถานี: '+ms.n+'<br>ระยะ: '+d.toFixed(1)+' กม. — '+(inR?'✓ ในรัศมี 20 กม.':'✗ นอกรัศมี 20 กม.')+'</div>':''))
+    .addTo(map);
+});
+
+const nfzGrps={};
+let nfzOn=true;
+Object.entries(NFZAPT).forEach(([pv,apts])=>{
+  const g=L.layerGroup();
+  apts.forEach(a=>{
+    L.circle([a.la,a.lo],{radius:9000,color:'#E24B4A',weight:2.5,opacity:.9,fillColor:'#E24B4A',fillOpacity:.12})
+      .bindPopup('<div class="pop-t">⛔ ATZ: '+a.n+'</div><div class="pop-s">เขตห้ามบินโดรน รัศมี 9 กม.</div>').addTo(g);
+    L.circleMarker([a.la,a.lo],{radius:6,fillColor:'#E24B4A',color:'#fff',weight:2,fillOpacity:1})
+      .bindPopup('<div class="pop-t">✈ '+a.n+'</div><div class="pop-s">ATZ ห้ามบินโดรน 9 กม. จาก ARP</div>').addTo(g);
+  });
+  nfzGrps[pv]=g;
+});
+
+const ALL_PTS=[...STA.map(s=>[s.la,s.lo]),...TGT.map(t=>[t.la,t.lo])];
+map.fitBounds(L.latLngBounds(ALL_PTS).pad(0.05));
+renderCards(null);
+
+function go(v){
+  document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
+  Object.values(nfzGrps).forEach(g=>map.removeLayer(g));
+  if(v==='all'){
+    map.fitBounds(L.latLngBounds(ALL_PTS).pad(0.05));
+    renderCards(null); return;
+  }
+  if(nfzOn&&nfzGrps[v])nfzGrps[v].addTo(map);
+  const ms=STA.find(s=>s.pv===v),mt=TGT.find(t=>t.pv===v);
+  if(ms&&mt){
+    const pts=[...( NFZAPT[v]||[] ).map(a=>[a.la,a.lo]),[ms.la,ms.lo],[mt.la,mt.lo]];
+    map.fitBounds(L.latLngBounds(pts).pad(0.35));
+  }
+  renderCards(v);
+}
+
+function toggleNFZ(){
+  nfzOn=document.getElementById('nfzchk').checked;
+  document.getElementById('nfzlbl').classList.toggle('active',nfzOn);
+  const v=(document.querySelector('.tab.on')||{}).dataset?.v||'all';
+  Object.values(nfzGrps).forEach(g=>map.removeLayer(g));
+  if(nfzOn&&v!=='all'&&nfzGrps[v])nfzGrps[v].addTo(map);
+}
+
+function renderCards(pv){
+  const el=document.getElementById('info-area');
+  const list=pv?TGT.filter(t=>t.pv===pv):TGT;
+  el.innerHTML=list.map(t=>{
+    const ms=matchSta(t),dS=ms?hav(t.la,t.lo,ms.la,ms.lo):0,inR=dS<=20;
+    const nb=nearestApt(t.pv,t),dA=nb?nb.d:0,inATZ=dA<=9;
+    return '<div class="icard">'
+      +'<div class="ic-prov">จ.'+PNAME[t.pv]+'</div>'
+      +'<div class="ic-loc">'+t.n+'</div>'
+      +'<div class="ic-lbl">สถานีบอลลูน: '+(ms?ms.n+' (WMO '+ms.w+')':'?')+'</div>'
+      +'<div style="display:flex;align-items:baseline;gap:4px;margin:2px 0">'
+      +'<span class="ic-km">'+dS.toFixed(1)+'</span><span class="ic-kms"> กม.</span></div>'
+      +'<span class="ic-bdg '+(inR?'bdy':'bdn')+'">'+(inR?'✓ ในรัศมี 20 กม.':'✗ นอกรัศมี 20 กม.')+'</span>'
+      +(nb?'<div class="ic-sep"></div>'
+      +'<div class="ic-lbl">สนามบินใกล้สุด: '+nb.a.n+'</div>'
+      +'<div style="display:flex;align-items:baseline;gap:4px;margin:2px 0">'
+      +'<span class="ic-km">'+dA.toFixed(1)+'</span><span class="ic-kms"> กม.</span></div>'
+      +'<span class="ic-bdg '+(!inATZ?'bdy':'bdn')+'">'+(!inATZ?'✓ นอก ATZ 9 กม.':'✗ ใน ATZ 9 กม.')+'</span>':'')
+      +'</div>';
+  }).join('');
+}
+</script>
+</body>
+</html>
